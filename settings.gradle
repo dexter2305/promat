@@ -1,0 +1,3 @@
+rootProject.name = 'promat'
+include 'promat-core'
+
