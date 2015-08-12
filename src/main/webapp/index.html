@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>P R O M A T</title>
+	<link href="app/styles/bootstrap.css" rel="stylesheet" />
+	<script src="app/lib/angular.js"></script>
+	<script src="app/lib/angular-resource.js"></script>
+    <script src="app/js/apiService.js"></script>
+    <script src="app/js/app.js"></script>
+</head>
+
+<body ng-app="PromatApp" class="container">
+	<h2>P R O M A T</h2>
+	<hr/>
+
+
+
+	<article ng-controller="candidatesController">
+		<table class="table table-responsive">
+			<tr>
+				<td>Candidate ID</td>
+				<td>Candidate Name</td>
+				<td>Gender</td>
+			</tr>
+			<tr ng-repeat="candidate in candidates">
+				<td>
+					{{candidate.id}}
+				</td>
+				<td>
+					{{candidate.name}}
+				</td>
+				<td>
+					{{candidate.gender}}
+				</td>
+			</tr>
+		</table>
+	</article>
+
+</body>
+
+</html>
