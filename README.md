@@ -26,22 +26,3 @@ Commands to pull from an existing remote repository
 	-- this pulls any new changes in the remote repository to local
 
 
-IDE related tasks. 
-
-Eclipse: 
-
-> gradlew eclipse
- 	-- creates the eclipse artifacts '.project' and '.classpath' files. 
-> gradlew cleanEclipse
-	-- deletes the eclipse artifacts
-
-The above tasks will require internet access for the first run, after which the switch '--offline' can be used as mentioned below. 
-> gradlew --offline eclipse
-> gradlew --offline cleanEclipse
-
-
-IDEA
-
-> gradlew idea 
-> gradlew cleanIdea
-
