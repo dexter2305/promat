@@ -2,40 +2,44 @@
 <html>
 
 <head>
-	<title>P R O M A T</title>
-	<link href="app/styles/bootstrap.css" rel="stylesheet" />
-	<script src="app/lib/angular.js"></script>
-	<script src="app/lib/angular-resource.js"></script>
+    <title>P R O M A T</title>
+    <link href="app/styles/bootstrap.css" rel="stylesheet"/>
+    <script src="app/lib/angular.js"></script>
+    <script src="app/lib/angular-resource.js"></script>
     <script src="app/js/apiService.js"></script>
     <script src="app/js/app.js"></script>
 </head>
 
-<body ng-app="PromatApp" class="container">
-	<h2>P R O M A T</h2>
-	<hr/>
+<body ng-app="PromatApp" class="container-fluid">
+<h2>P R O M A T</h2>
+<br/>
 
-
-
-	<article ng-controller="candidatesController">
-		<table class="table table-responsive">
-			<tr>
-				<td>Candidate ID</td>
-				<td>Candidate Name</td>
-				<td>Gender</td>
-			</tr>
-			<tr ng-repeat="candidate in candidates">
-				<td>
-					{{candidate.id}}
-				</td>
-				<td>
-					{{candidate.name}}
-				</td>
-				<td>
-					{{candidate.gender}}
-				</td>
-			</tr>
-		</table>
-	</article>
+<span>
+    Search by Name <input type="text" ng-model="queryByName"/>
+</span>
+<br/>
+<article ng-controller="candidatesController">
+    <table class="table table-responsive">
+        <tr>
+            <td><strong>Candidate ID</strong></td>
+            <td><strong>Candidate Name</strong></td>
+            <td><strong>Gender</strong></td>
+        </tr>
+        <tr ng-repeat="candidate in candidates | filter: queryByName">
+            <td>
+                {{candidate.id}}
+            </td>
+            <td>
+                <a href="#">
+                    {{candidate.name}}
+                </a>
+            </td>
+            <td>
+                {{candidate.gender}}
+            </td>
+        </tr>
+    </table>
+</article>
 
 </body>
 
