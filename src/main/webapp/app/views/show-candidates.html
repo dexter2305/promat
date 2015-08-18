@@ -1,0 +1,28 @@
+<span>
+    Search  <input type="text" ng-model="queryByName"/>
+</span>
+
+<hr/>
+
+<article>
+    <table class="table table-responsive">
+        <tr>
+            <td><strong>Candidate ID</strong></td>
+            <td><strong>Candidate Name</strong></td>
+            <td><strong>Gender</strong></td>
+        </tr>
+        <tr ng-repeat="candidate in candidates | filter: queryByName">
+            <td>
+                {{candidate.id}}
+            </td>
+            <td>
+                <a href="#">
+                    {{candidate.name}}
+                </a>
+            </td>
+            <td>
+                {{candidate.gender}}
+            </td>
+        </tr>
+    </table>
+</article>

@@ -4,43 +4,28 @@
 <head>
     <title>P R O M A T</title>
     <link href="app/styles/bootstrap.css" rel="stylesheet"/>
+    <!-- libraries -->
     <script src="app/lib/angular.js"></script>
     <script src="app/lib/angular-resource.js"></script>
+    <script src="app/lib/angular-route.min.js"></script>
+
+
+    <!-- application -->
     <script src="app/js/apiService.js"></script>
     <script src="app/js/app.js"></script>
+
 </head>
 
 <body ng-app="PromatApp" class="container-fluid">
 <h2>P R O M A T</h2>
-<br/>
+<hr/>
+<div>
+    <h4><a href="#showCandidates">List candidates </a> | <a href="#addCandidate">Add candidate</a></h4>
+    <hr/>
+</div>
 
-<span>
-    Search by Name <input type="text" ng-model="queryByName"/>
-</span>
-<br/>
-<article ng-controller="candidatesController">
-    <table class="table table-responsive">
-        <tr>
-            <td><strong>Candidate ID</strong></td>
-            <td><strong>Candidate Name</strong></td>
-            <td><strong>Gender</strong></td>
-        </tr>
-        <tr ng-repeat="candidate in candidates | filter: queryByName">
-            <td>
-                {{candidate.id}}
-            </td>
-            <td>
-                <a href="#">
-                    {{candidate.name}}
-                </a>
-            </td>
-            <td>
-                {{candidate.gender}}
-            </td>
-        </tr>
-    </table>
-</article>
-
+<div class="col-md-9">
+    <div ng-view></div>
+</div>
 </body>
-
 </html>
