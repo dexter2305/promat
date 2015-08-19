@@ -1,15 +1,13 @@
-# promat
-Profile matcher
 
-Project directory structure. 
+To run the project
 
-++promat (project)
-++++promat-core(module)
-++++++src/main/java (all the java sources)
-++++++src/test/java (all the test sources - like junit)
-++++settings.gradle
+Install Maven
+git clone https://github.com/dexter2305/promat.git
+mvn jetty:run
+http://localhost:8080/promat
 
-Git commands: 
+
+Git commands:
 
 Commands to create a project from local workspace and push to remote
 > git config --user.name <>
