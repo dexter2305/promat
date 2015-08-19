@@ -10,28 +10,45 @@ angular.module('PromatApp', ['apiService','ngRoute'])
         templateUrl: 'app/views/show-candidates.html',
         controller: 'ShowCandidatesController'
       }).
+      when('/home', {
+              templateUrl: 'app/views/home-view.html',
+              controller: 'HomeViewController'
+            }).
       otherwise({
-        redirectTo: '/showCandidates'
+        redirectTo: '/home'
       });
   }])
-.controller('AddCandidateController', function($scope){
-    $scope.message = 'Add candidate use case';
+.controller('AddCandidateController', function($scope, Candidates){
+
+    $scope.addCandidate = function(candidate){
+        $scope.message = 'User ' + candidate.name + ' added successfully';
+        Candidates.save(candidate);
+        $scope.message = candidate.name + " created successfully."
+        reset();
+    };
+
+    $scope.reset = function(){
+        console.log("reset of 'AddNewCandidate' form called ");
+        $scope.candidate = new Object();
+    };
 })
 .controller('ShowCandidatesController', function($scope, Candidates){
   	this.init = function () {
-  	    console.log("getting all candidates");
-  		$scope.candidates = Candidates.query();
-  		//this.getAllCandidates();
-  		$scope.message = "show candidate use case !! "
-  		console.log("invoked init()");
+  		this.getAllCandidates();
   	};
-
 
   	this.getAllCandidates = function() {
-  		$scope.candidates = apiService.query();
-  		console.log("invoked getAllCandidates()");
+  		$scope.candidates = Candidates.query();
   	};
+
+    $scope.deleteCandidate = function(candidateId){
+
+    };
+
   	this.init();
+
+})
+.controller('HomeViewController', function(){
 
 })
 ;

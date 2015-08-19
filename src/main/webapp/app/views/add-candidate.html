@@ -1,3 +1,28 @@
-<h2>Add New Candidate</h2>
-
-{{ message }}
+<p class="lead">Add new profile for candidate.</p>
+<form novalidate class="simple-form">
+    <table class="table table-responsive">
+        <tr>
+            <td>ID</td>
+            <td><input type="text" ng-model="candidate.id"/></td>
+        </tr>
+        <tr>
+            <td>Name</td>
+            <td><input type="text" ng-model="candidate.name"/></td>
+        </tr>
+        <tr>
+            <td>Gender</td>
+            <td><input type="radio" ng-model="candidate.gender" value="male"/>male
+                <input type="radio" ng-model="candidate.gender" value="female"/>female
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a role="button" ng-click="reset()" class="btn btn-warning">Reset</a>
+            </td>
+            <td>
+                <a role="button" ng-click="addCandidate(candidate)" class="btn btn-success">Save</a>
+            </td>
+        </tr>
+    </table>
+</form>
+{{message}}

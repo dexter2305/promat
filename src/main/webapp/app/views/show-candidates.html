@@ -1,9 +1,7 @@
 <span>
     Search  <input type="text" ng-model="queryByName"/>
 </span>
-
 <hr/>
-
 <article>
     <table class="table table-responsive">
         <tr>
@@ -16,12 +14,15 @@
                 {{candidate.id}}
             </td>
             <td>
-                <a href="#">
+                <a href="#/{{candidate.id}}">
                     {{candidate.name}}
                 </a>
             </td>
             <td>
                 {{candidate.gender}}
+            </td>
+            <td>
+                <a role="button" ng-click="deleteCandidate(candidate)" class="btn btn-danger">Delete</a>
             </td>
         </tr>
     </table>

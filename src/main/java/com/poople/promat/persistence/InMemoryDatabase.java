@@ -10,9 +10,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryDatabase {
 
+    public static final InMemoryDatabase INSTANCE = new InMemoryDatabase();
+
     private Map<Long, Candidate> store = new ConcurrentHashMap<Long, Candidate>();
 
-    public InMemoryDatabase() {
+    private InMemoryDatabase() {
         Collection<Candidate> testCandidates = getTestCandidates();
 
         Iterator<Candidate> iterator = testCandidates.iterator();
@@ -45,23 +47,23 @@ public class InMemoryDatabase {
     private Collection<Candidate> getTestCandidates() {
         Collection<Candidate> candidates = new LinkedList<>();
 
-        Candidate anand = new Candidate();
-        anand.setGender(Candidate.Gender.MALE);
-        anand.setName("Rob Stark");
-        anand.setId(90123);
+        Candidate rob = new Candidate();
+        rob.setGender(Candidate.Gender.MALE);
+        rob.setName("Rob Stark");
+        rob.setId(90123);
 
-        Candidate rekha = new Candidate();
-        rekha.setName("Yigrette");
-        rekha.setGender(Candidate.Gender.FEMALE);
-        rekha.setId(80967);
+        Candidate yigrette = new Candidate();
+        yigrette.setName("Yigrette");
+        yigrette.setGender(Candidate.Gender.FEMALE);
+        yigrette.setId(80967);
 
         Candidate ned = new Candidate();
         ned.setName("Ned Stark");
         ned.setId(78907);
         ned.setGender(Candidate.Gender.MALE);
 
-        candidates.add(anand);
-        candidates.add(rekha);
+        candidates.add(rob);
+        candidates.add(yigrette);
         candidates.add(ned);
 
         return candidates;

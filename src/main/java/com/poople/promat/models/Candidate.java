@@ -1,8 +1,5 @@
 package com.poople.promat.models;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class Candidate {
 
     private long id;
@@ -38,5 +35,13 @@ public class Candidate {
 
     public enum Gender{
         FEMALE, MALE;
+    }
+
+    @Override
+    public String toString() {
+        return "Candidate{" +
+                "name='" + name + '\'' +
+                ", id=" + id +
+                '}';
     }
 }
