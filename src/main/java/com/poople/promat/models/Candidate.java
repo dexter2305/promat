@@ -41,7 +41,8 @@ public class Candidate {
     public String toString() {
         return "Candidate{" +
                 "name='" + name + '\'' +
-                ", id=" + id +
+                ", id=" + id + '\'' +
+                ", gender=" + gender + 
                 '}';
     }
 }
