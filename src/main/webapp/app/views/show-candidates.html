@@ -1,8 +1,8 @@
-<span>
-    Search  <input type="text" ng-model="queryByName"/>
-</span>
-<hr/>
-<article>
+<article ng-show="candidates.length">
+    <span>
+        Search  <input type="text" ng-model="queryByName"/>
+    </span>
+    <hr/>
     <table class="table table-responsive">
         <tr>
             <td><strong>Candidate ID</strong></td>
@@ -26,4 +26,15 @@
             </td>
         </tr>
     </table>
+</article>
+<article ng-show="candidates.length === 0">
+    <div class="container">
+        <div class="jumbotron">
+            <h3>Time to start</h3>
+
+            <p><a href="#addCandidate"class="btn btn-primary btn-lg" role="button">
+                Add Profiles</a>
+            </p>
+        </div>
+    </div>
 </article>

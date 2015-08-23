@@ -1,11 +1,14 @@
 angular.module('apiService', ['ngResource'])
 
-// Booking Resource
+
 .factory("Candidates", function ($resource) {
     return $resource(
-        "http://localhost:8080/promat/webapi/candidates/:Id",
-        {Id: "@Id" },
+        "http://localhost:8080/promat/webapi/candidates/:id",
         {
-            "update": {method: "PUT"}        }
+            id: "@id"
+        },
+        {
+            "update": {method: "PUT"}
+        }
     );
 });

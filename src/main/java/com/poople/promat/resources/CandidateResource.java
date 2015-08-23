@@ -59,5 +59,14 @@ public class CandidateResource {
         return response;
     }
 
+    @DELETE
+    @Path("/{id}")
+    public Response delete(@PathParam("id")long candidateId){
+        logger.info("delete: " + candidateId);
+        db.delete(candidateId);
+        Response response = Response.ok().build();
+        logger.info("delete: " + candidateId + " returned " + response.getStatus());
+        return response;
+    }
 
 }
