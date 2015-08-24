@@ -41,8 +41,13 @@ angular.module('PromatApp', ['apiService','ngRoute'])
   		$scope.candidates = Candidates.query();
   	};
 
-    $scope.deleteCandidate = function(candidateId){
-
+    $scope.deleteCandidate = function(candidate){
+        console.log("about to delete " + candidate.id);
+        //Candidates.delete({id, candidate.id});
+        candidate.$delete(function(){
+            $scope.candidates = Candidates.query();
+        });
+        console.log("delete of " + candidate.id);
     };
 
   	this.init();
