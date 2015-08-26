@@ -49,6 +49,7 @@ public class CandidateResource {
     }
 
     @POST
+    @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response create(Candidate candidate) {
         logger.info("create: " + candidate);
@@ -66,6 +67,22 @@ public class CandidateResource {
         db.delete(candidateId);
         Response response = Response.ok().build();
         logger.info("delete: " + candidateId + " returned " + response.getStatus());
+        return response;
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response update(Candidate candidate){
+        logger.info("update: " + candidate.getId());
+        Response response;
+        if (db.read(candidate.getId()) != null){
+            db.update(candidate);
+            response = Response.ok().build();
+        }else{
+            response = Response.status(Response.Status.NOT_FOUND).build();
+        }
+        logger.info("update: " + candidate.getId() + " returned " + response.getStatus());
         return response;
     }
 
