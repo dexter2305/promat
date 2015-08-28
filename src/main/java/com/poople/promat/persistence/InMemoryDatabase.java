@@ -25,6 +25,8 @@ public class InMemoryDatabase {
     }
 
     public void create(Candidate person) {
+        long id = IDGenerator.INSTANCE.getUUID();
+        person.setId(id);
         store.put(person.getId(), person);
     }
 
@@ -50,16 +52,19 @@ public class InMemoryDatabase {
         Candidate rob = new Candidate();
         rob.setGender(Candidate.Gender.MALE);
         rob.setName("Rob Stark");
-        rob.setId(90123);
+        long id = IDGenerator.INSTANCE.getUUID();
+        rob.setId(id);
 
         Candidate yigrette = new Candidate();
         yigrette.setName("Yigrette");
         yigrette.setGender(Candidate.Gender.FEMALE);
-        yigrette.setId(80967);
+        id = IDGenerator.INSTANCE.getUUID();
+        yigrette.setId(id);
 
         Candidate ned = new Candidate();
         ned.setName("Ned Stark");
-        ned.setId(78907);
+        id = IDGenerator.INSTANCE.getUUID();
+        ned.setId(id);
         ned.setGender(Candidate.Gender.MALE);
 
         candidates.add(rob);

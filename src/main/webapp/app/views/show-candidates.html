@@ -1,6 +1,6 @@
 <article ng-show="candidates.length">
     <span>
-        Search  <input type="text" ng-model="queryByName"/>
+        Search  <input type="text" ng-model="query" placeholder=" ID  or Name"/>
     </span>
     <hr/>
     <table class="table table-responsive">
@@ -8,8 +8,9 @@
             <td><strong>Candidate ID</strong></td>
             <td><strong>Candidate Name</strong></td>
             <td><strong>Gender</strong></td>
+            <td><strong>Action</strong></td>
         </tr>
-        <tr ng-repeat="candidate in candidates | filter: queryByName">
+        <tr ng-repeat="candidate in candidates | filter: query">
             <td>
                 {{candidate.id}}
             </td>

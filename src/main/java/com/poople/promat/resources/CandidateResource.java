@@ -49,7 +49,6 @@ public class CandidateResource {
     }
 
     @POST
-    @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response create(Candidate candidate) {
         logger.info("create: " + candidate);
