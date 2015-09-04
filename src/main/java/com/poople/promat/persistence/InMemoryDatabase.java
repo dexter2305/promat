@@ -1,6 +1,7 @@
 package com.poople.promat.persistence;
 
 import com.poople.promat.models.Candidate;
+import com.poople.promat.models.Contact;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -48,18 +49,27 @@ public class InMemoryDatabase {
 
     private Collection<Candidate> getTestCandidates() {
         Collection<Candidate> candidates = new LinkedList<>();
+        long id;
 
         Candidate rob = new Candidate();
         rob.setGender(Candidate.Gender.MALE);
         rob.setName("Rob Stark");
-        long id = IDGenerator.INSTANCE.getUUID();
+        id = IDGenerator.INSTANCE.getUUID();
         rob.setId(id);
+        Contact robContact = new Contact();
+        robContact.setEmail("robStark@got.com");
+        robContact.setPhoneNumber("+919879689123");
+        rob.setContact(robContact);
 
         Candidate yigrette = new Candidate();
         yigrette.setName("Yigrette");
         yigrette.setGender(Candidate.Gender.FEMALE);
         id = IDGenerator.INSTANCE.getUUID();
         yigrette.setId(id);
+        Contact yContact = new Contact();
+        yContact.setEmail("yiggy@got.com");
+        yContact.setPhoneNumber("+91987912367");
+        yigrette.setContact(yContact);
 
         Candidate ned = new Candidate();
         ned.setName("Ned Stark");

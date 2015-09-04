@@ -8,6 +8,19 @@ public class Candidate {
 
     private Gender gender;
 
+    private Contact contact;
+
+    public Candidate(){
+        contact = new Contact();
+    }
+
+    public Contact getContact() {
+        return contact;
+    }
+
+    public void setContact(Contact contact) {
+        this.contact = contact;
+    }
 
     public long getId() {
         return id;
@@ -34,7 +47,7 @@ public class Candidate {
     }
 
     public enum Gender{
-        FEMALE, MALE;
+        FEMALE, MALE
     }
 
     @Override
