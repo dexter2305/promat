@@ -3,7 +3,7 @@ angular.module('PromatApp', ['apiService','ngRoute'])
 .config(['$routeProvider', function($routeProvider) {
     $routeProvider
     .when('/addCandidate', {
-        templateUrl: 'app/views/add-candidate.html',
+        templateUrl: 'app/views/candidate-profile.html',
         controller: 'AddCandidateController'
     })
     .when('/candidates', {
@@ -67,6 +67,19 @@ angular.module('PromatApp', ['apiService','ngRoute'])
     };
 })
 .controller('HomeViewController', function(){
+
+})
+.controller('TabNavigationController', function(){
+        // Init tab index
+        this.tab = 0;
+        // setting tab index
+        this.setTab = function (tabIdx) {
+            this.tab = tabIdx;
+        };
+        // checking tab index
+        this.isTab = function (tabIdx) {
+            return this.tab == tabIdx;
+        };
 
 })
 ;

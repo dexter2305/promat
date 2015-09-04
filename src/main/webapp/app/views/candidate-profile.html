@@ -1,0 +1,58 @@
+<article class="panel panel-body" ng-controller="TabNavigationController  as tabCtrl">
+
+
+    <h3>Candidate Profile Information &nbsp; &nbsp; <a role="button" ng-click="#" class="btn btn-success">Save</a></h3>
+    <hr>
+    <div>
+        <ul class="nav nav-tabs nav-tabs-justified" ng-init="tab=0">
+            <li ng-class="{active: tabCtrl.isTab(0)}">
+                <a ng-click="tabCtrl.setTab(0)">Basic</a>
+            </li>
+            <li ng-class="{active: tabCtrl.isTab(1)}">
+                <a ng-click="tabCtrl.setTab(1)">Physique</a>
+            </li>
+            <li ng-class="{active: tabCtrl.isTab(2)}">
+                <a ng-click="tabCtrl.setTab(2)">Education</a>
+            </li>
+            <li ng-class="{active: tabCtrl.isTab(3)}">
+                <a ng-click="tabCtrl.setTab(3)">Occupation</a>
+            </li>
+        </ul>
+    </div>
+    </div>
+    <div ng-show="tabCtrl.isTab(0)">
+        <table class="table table-responsive">
+            <tr>
+                <td>Name</td>
+                <td><input type="text" ng-model="candidate.name"/></td>
+            </tr>
+            <tr>
+                <td>Gender</td>
+                <td><input type="radio" ng-model="candidate.gender" value="MALE"/> Male
+                    <input type="radio" ng-model="candidate.gender" value="FEMALE"/> Female
+                </td>
+            </tr>
+            <tr>
+                <td>Phone</td>
+                <td><input type="text" ng-model="candidate.contact.phoneNumber"/></td>
+            </tr>
+            <tr>
+                <td>Email</td>
+                <td><input type="text" ng-model="candidate.contact.email"/></td>
+            </tr>
+        </table>
+    </div>
+    </div>
+    <div ng-show="tabCtrl.isTab(1)">
+        <h4>Physique data</h4>
+    </div>
+    </div>
+    <div ng-show="tabCtrl.isTab(2)">
+        <h4>Education qualification</h4>
+    </div>
+    </div>
+    <div ng-show="tabCtrl.isTab(3)">
+        <h4>Occupation details</h4>
+    </div>
+
+</article>
