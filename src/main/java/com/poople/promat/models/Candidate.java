@@ -10,16 +10,11 @@ public class Candidate {
 
     private Contact contact;
 
+    private Physique physique;
+
     public Candidate(){
         contact = new Contact();
-    }
-
-    public Contact getContact() {
-        return contact;
-    }
-
-    public void setContact(Contact contact) {
-        this.contact = contact;
+        physique = new Physique();
     }
 
     public long getId() {
@@ -44,6 +39,22 @@ public class Candidate {
 
     public void setGender(Gender gender) {
         this.gender = gender;
+    }
+
+    public Contact getContact() {
+        return contact;
+    }
+
+    public void setContact(Contact contact) {
+        this.contact = contact;
+    }
+
+    public Physique getPhysique() {
+        return physique;
+    }
+
+    public void setPhysique(Physique physique) {
+        this.physique = physique;
     }
 
     public enum Gender{

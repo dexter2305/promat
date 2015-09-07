@@ -2,9 +2,9 @@ package com.poople.promat.persistence;
 
 import com.poople.promat.models.Candidate;
 import com.poople.promat.models.Contact;
+import com.poople.promat.models.Physique;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,16 +13,16 @@ public class InMemoryDatabase {
 
     public static final InMemoryDatabase INSTANCE = new InMemoryDatabase();
 
-    private Map<Long, Candidate> store = new ConcurrentHashMap<Long, Candidate>();
+    private Map<Long, Candidate> store = new ConcurrentHashMap<>();
 
     private InMemoryDatabase() {
         Collection<Candidate> testCandidates = getTestCandidates();
 
-        Iterator<Candidate> iterator = testCandidates.iterator();
-        while(iterator.hasNext()){
-            Candidate c = iterator.next();
+        for (Candidate c : testCandidates) {
             store.put(c.getId(), c);
         }
+
+
     }
 
     public void create(Candidate person) {
@@ -56,17 +56,24 @@ public class InMemoryDatabase {
         rob.setName("Rob Stark");
         id = IDGenerator.INSTANCE.getUUID();
         rob.setId(id);
-        Contact robContact = new Contact();
+        Contact robContact = rob.getContact();
         robContact.setEmail("robStark@got.com");
         robContact.setPhoneNumber("+919879689123");
         rob.setContact(robContact);
+        Physique robPhysique = rob.getPhysique();
+        robPhysique.setBloodGroup(Physique.Bloodgroup.ABPOSITIVE);
+        robPhysique.setBodyType(Physique.BodyType.ATHLETIC);
+        robPhysique.setHeight(170);
+        robPhysique.setWeight(70);
+        robPhysique.setSkinTone(Physique.SkinTone.FAIR);
+        rob.setPhysique(robPhysique);
 
         Candidate yigrette = new Candidate();
         yigrette.setName("Yigrette");
         yigrette.setGender(Candidate.Gender.FEMALE);
         id = IDGenerator.INSTANCE.getUUID();
         yigrette.setId(id);
-        Contact yContact = new Contact();
+        Contact yContact = yigrette.getContact();
         yContact.setEmail("yiggy@got.com");
         yContact.setPhoneNumber("+91987912367");
         yigrette.setContact(yContact);

@@ -11,7 +11,7 @@ angular.module('PromatApp', ['apiService','ngRoute'])
         controller: 'ShowCandidatesController'
     })
     .when('/candidate/:candidateId', {
-            templateUrl: 'app/views/show-candidate-details.html',
+            templateUrl: 'app/views/candidate-profile.html',
             controller: 'ShowCandidateDetailsController'
     })
     .when('/home', {
@@ -50,12 +50,9 @@ angular.module('PromatApp', ['apiService','ngRoute'])
 })
 .controller('ShowCandidateDetailsController', function($scope, $routeParams, Candidates){
     this.init = function(candidateId){
-        console.log('ShowCandidateDetailsController.init() invoked for id:' + candidateId);
         Candidates.get({id:candidateId},function(candidate){
             $scope.candidate = candidate;
-            console.log("retrieved " + candidate.name + " for " + candidateId);
         });
-        console.log("ShowCandidateDetailsController.init() completed for id:" + candidateId);
     };
 
     this.init($routeParams.candidateId);
@@ -80,6 +77,32 @@ angular.module('PromatApp', ['apiService','ngRoute'])
         this.isTab = function (tabIdx) {
             return this.tab == tabIdx;
         };
-
+})
+.controller('SkinToneOptionsController',function($scope){
+    $scope.skinTones = [
+        "DARK",
+        "MODERATE",
+        "FAIR"
+    ];
+})
+.controller('BodyTypeOptionsController',function($scope){
+    $scope.bodyTypes = [
+        "NORMAL",
+        "SLIM",
+        "ATHLETIC",
+        "HEAVY"
+    ];
+})
+.controller('BloodGroupOptionsController', function($scope){
+    $scope.bloodGroups = [
+        "OPOSITIVE",
+        "ONEGATIVE",
+        "APOSITIVE",
+        "ANEGATIVE",
+        "BPOSITIVE",
+        "BNEGATIVE",
+        "ABPOSITIVE",
+        "ABNEGATIVE",
+    ];
 })
 ;
