@@ -1,5 +1,5 @@
 <article class="panel panel-body" ng-controller="TabNavigationController  as tabCtrl">
-    <h3>Candidate Profile Information &nbsp; &nbsp; <a role="button" ng-click="#" class="btn btn-success">Save</a></h3>
+    <h3>Candidate Profile Information &nbsp; &nbsp; <a role="button" ng-click="updateCandidate(candidate)" class="btn btn-success">Save</a></h3>
     <hr>
     <div>
         <ul class="nav nav-tabs nav-tabs-justified" ng-init="tab=0">
@@ -19,83 +19,23 @@
 
     </div>
     <div ng-show="tabCtrl.isTab(0)">
-        <table class="table table-responsive">
-            <tr>
-                <td>ID</td>
-                <td><input type="text" ng-model="candidate.id" disabled/></td>
-            </tr>
-            <tr>
-                <td>Name</td>
-                <td><input type="text" ng-model="candidate.name"/></td>
-            </tr>
-            <tr>
-                <td>Gender</td>
-                <td><input type="radio" ng-model="candidate.gender" value="MALE"/> Male
-                    <input type="radio" ng-model="candidate.gender" value="FEMALE"/> Female
-                </td>
-            </tr>
-            <tr>
-                <td>Phone</td>
-                <td><input type="text" ng-model="candidate.contact.phoneNumber"/></td>
-            </tr>
-            <tr>
-                <td>Email</td>
-                <td><input type="text" ng-model="candidate.contact.email"/></td>
-            </tr>
-        </table>
+       <div ng-include="'app/views/candidate-profile-basic-info.html'">
+
+       </div>
     </div>
     <div ng-show="tabCtrl.isTab(1)">
-        <table class="table table-responsive">
-            <tr>
-                <td>Height (in cm)</td>
-                <td><input type="text" ng-model="candidate.physique.height"/></td>
-            </tr>
-            <tr>
-                <td>Weight (in kg)</td>
-                <td><input type="text" ng-model="candidate.physique.weight"/></td>
-            </tr>
-            <tr>
-                <td>Skin tone</td>
-                <td>
-                    <div data-ng-controller="SkinToneOptionsController">
-                        <div>
-                            <select data-ng-model="candidate.physique.skinTone"
-                                    data-ng-options="skinTone for skinTone in skinTones" ng-selected="{{candidate.physique.skinTone}}">
-                            </select>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>Body Type</td>
-                <td>
-                    <div data-ng-controller="BodyTypeOptionsController">
-                        <div>
-                            <select data-ng-model="candidate.physique.bodyType"
-                                    data-ng-options="bodyType for bodyType in bodyTypes" ng-selected="{{candidate.physique.bodyType}}">
-                            </select>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>Blood Group</td>
-                <td>
-                    <div data-ng-controller="BloodGroupOptionsController">
-                        <div>
-                            <select data-ng-model="candidate.physique.bloodGroup"
-                                    data-ng-options="bloodGroup for bloodGroup in bloodGroups" ng-selected="{{candidate.physique.bloodGroup}}">
-                            </select>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </table>
+        <div ng-include="'app/views/candidate-profile-physique-info.html'">
+
+        </div>
     </div>
     <div ng-show="tabCtrl.isTab(2)">
-        <h4>Education qualification</h4>
+        <div ng-include="'app/views/candidate-profile-education-info.html'">
+
+        </div>
     </div>
     <div ng-show="tabCtrl.isTab(3)">
-        <h4>Occupation details</h4>
+        <div ng-include="'app/views/candidate-profile-qualification-info.html'">
+
+        </div>
     </div>
 </article>

@@ -32,7 +32,7 @@ angular.module('PromatApp', ['apiService','ngRoute'])
     $scope.reset = function(){
         $scope.candidate = new Object();
     };
-
+    $scope.isNewProfile = true;
 })
 .controller('ShowCandidatesController', function($scope, Candidates){
   	this.init = function () {

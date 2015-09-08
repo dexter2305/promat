@@ -1,0 +1,46 @@
+<table class="table table-responsive">
+    <tr>
+        <td>Height (in cm)</td>
+        <td><input type="text" ng-model="candidate.physique.height"/></td>
+    </tr>
+    <tr>
+        <td>Weight (in kg)</td>
+        <td><input type="text" ng-model="candidate.physique.weight"/></td>
+    </tr>
+    <tr>
+        <td>Skin tone</td>
+        <td>
+            <div data-ng-controller="SkinToneOptionsController">
+                <div>
+                    <select data-ng-model="candidate.physique.skinTone"
+                            data-ng-options="skinTone for skinTone in skinTones" ng-selected="{{candidate.physique.skinTone}}">
+                    </select>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>Body Type</td>
+        <td>
+            <div data-ng-controller="BodyTypeOptionsController">
+                <div>
+                    <select data-ng-model="candidate.physique.bodyType"
+                            data-ng-options="bodyType for bodyType in bodyTypes" ng-selected="{{candidate.physique.bodyType}}">
+                    </select>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>Blood Group</td>
+        <td>
+            <div data-ng-controller="BloodGroupOptionsController">
+                <div>
+                    <select data-ng-model="candidate.physique.bloodGroup"
+                            data-ng-options="bloodGroup for bloodGroup in bloodGroups" ng-selected="{{candidate.physique.bloodGroup}}">
+                    </select>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
