@@ -1,1 +1,12 @@
-<h4>Education qualification</h4>
+<table class="table table-responsive table-hover">
+    <tr>
+        <td>Qualification</td>
+        <td>Gradution year</td>
+        <td>Institution</td>
+    </tr>
+    <tr ng-repeat="education in candidate.educations">
+        <td>{{education.qualification}}</td>
+        <td>{{education.yearOfGraduation}}</td>
+        <td>{{education.instituteName}}</td>
+    </tr>
+</table>

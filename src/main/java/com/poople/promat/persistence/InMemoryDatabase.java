@@ -2,6 +2,7 @@ package com.poople.promat.persistence;
 
 import com.poople.promat.models.Candidate;
 import com.poople.promat.models.Contact;
+import com.poople.promat.models.Education;
 import com.poople.promat.models.Physique;
 
 import java.util.Collection;
@@ -49,12 +50,48 @@ public class InMemoryDatabase {
 
     private Collection<Candidate> getTestCandidates() {
         Collection<Candidate> candidates = new LinkedList<>();
-        long id;
 
+
+        Candidate rob = getRobStark();
+        Candidate yigrette = getYigrette();
+        Candidate ned = getNedStark();
+
+        candidates.add(rob);
+        candidates.add(yigrette);
+        candidates.add(ned);
+
+        return candidates;
+    }
+
+    /* HELPER METHODS */
+
+    private Candidate getNedStark() {
+        Candidate ned = new Candidate();
+        ned.setName("Ned Stark");
+        long id = IDGenerator.INSTANCE.getUUID();
+        ned.setId(id);
+        ned.setGender(Candidate.Gender.MALE);
+        return ned;
+    }
+
+    private Candidate getYigrette() {
+        Candidate yigrette = new Candidate();
+        yigrette.setName("Yigrette");
+        yigrette.setGender(Candidate.Gender.FEMALE);
+        long id = IDGenerator.INSTANCE.getUUID();
+        yigrette.setId(id);
+        Contact yContact = yigrette.getContact();
+        yContact.setEmail("yiggy@got.com");
+        yContact.setPhoneNumber("+91987912367");
+        yigrette.setContact(yContact);
+        return yigrette;
+    }
+
+    private Candidate getRobStark() {
         Candidate rob = new Candidate();
         rob.setGender(Candidate.Gender.MALE);
         rob.setName("Rob Stark");
-        id = IDGenerator.INSTANCE.getUUID();
+        long id = IDGenerator.INSTANCE.getUUID();
         rob.setId(id);
         Contact robContact = rob.getContact();
         robContact.setEmail("robStark@got.com");
@@ -67,28 +104,11 @@ public class InMemoryDatabase {
         robPhysique.setWeight(70);
         robPhysique.setSkinTone(Physique.SkinTone.FAIR);
         rob.setPhysique(robPhysique);
-
-        Candidate yigrette = new Candidate();
-        yigrette.setName("Yigrette");
-        yigrette.setGender(Candidate.Gender.FEMALE);
-        id = IDGenerator.INSTANCE.getUUID();
-        yigrette.setId(id);
-        Contact yContact = yigrette.getContact();
-        yContact.setEmail("yiggy@got.com");
-        yContact.setPhoneNumber("+91987912367");
-        yigrette.setContact(yContact);
-
-        Candidate ned = new Candidate();
-        ned.setName("Ned Stark");
-        id = IDGenerator.INSTANCE.getUUID();
-        ned.setId(id);
-        ned.setGender(Candidate.Gender.MALE);
-
-        candidates.add(rob);
-        candidates.add(yigrette);
-        candidates.add(ned);
-
-        return candidates;
+        Education ug = new Education();
+        ug.setQualification("BE (Computer Science)");
+        ug.setInstituteName("PSG, Coimbatore");
+        ug.setYearOfGraduation(2003);
+        rob.getEducations().add(ug);
+        return rob;
     }
-
 }

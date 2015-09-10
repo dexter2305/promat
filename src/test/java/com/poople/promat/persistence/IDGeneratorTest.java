@@ -17,6 +17,6 @@ public class IDGeneratorTest {
     public void testForTwoSuccessiveCalls(){
         long result1 = IDGenerator.INSTANCE.getUUID();
         long result2 = IDGenerator.INSTANCE.getUUID();
-        Assert.assertNotEquals(result1, result2);
+        Assert.assertNotSame(result1, result2);
     }
 }

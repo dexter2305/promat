@@ -23,4 +23,13 @@ public class CandidateTest {
         Assert.assertNotNull(candidate.getPhysique());
     }
 
+    @Test
+    public void testEducationsMustBeNonNull(){
+        Assert.assertNotNull(candidate.getEducations());
+    }
+
+    public void testEducationsSizeMustBeZeroInitially(){
+        Assert.assertEquals(0, candidate.getEducations());
+    }
+
 }

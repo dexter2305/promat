@@ -1,5 +1,8 @@
 package com.poople.promat.models;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 public class Candidate {
 
     private long id;
@@ -12,9 +15,12 @@ public class Candidate {
 
     private Physique physique;
 
-    public Candidate(){
+    private Set<Education> educations;
+
+    public Candidate() {
         contact = new Contact();
         physique = new Physique();
+        educations = new LinkedHashSet<>();
     }
 
     public long getId() {
@@ -57,7 +63,15 @@ public class Candidate {
         this.physique = physique;
     }
 
-    public enum Gender{
+    public Set<Education> getEducations() {
+        return educations;
+    }
+
+    public void setEducations(Set<Education> educations) {
+        this.educations = educations;
+    }
+
+    public enum Gender {
         FEMALE, MALE
     }
 
@@ -66,7 +80,7 @@ public class Candidate {
         return "Candidate{" +
                 "name='" + name + '\'' +
                 ", id=" + id + '\'' +
-                ", gender=" + gender + 
+                ", gender=" + gender +
                 '}';
     }
 }
