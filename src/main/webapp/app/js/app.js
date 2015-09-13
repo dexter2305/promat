@@ -62,6 +62,8 @@ angular.module('PromatApp', ['apiService','ngRoute'])
         candidate.$update();
         $scope.message = candidate.name + " updated successfully."
     };
+
+
 })
 .controller('HomeViewController', function(){
 
@@ -76,6 +78,9 @@ angular.module('PromatApp', ['apiService','ngRoute'])
         // checking tab index
         this.isTab = function (tabIdx) {
             return this.tab == tabIdx;
+        };
+        $scope.deleteEducation = function(education){
+            console.log(education.qualification);
         };
 })
 .controller('SkinToneOptionsController',function($scope){

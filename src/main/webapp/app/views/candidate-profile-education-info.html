@@ -1,12 +1,13 @@
 <table class="table table-responsive table-hover">
     <tr>
-        <td>Qualification</td>
-        <td>Gradution year</td>
-        <td>Institution</td>
+        <td><h5>Qualification</h5></td>
+        <td><h5>Gradution year</h5></td>
+        <td><h5>Institution</h5></td>
     </tr>
     <tr ng-repeat="education in candidate.educations">
-        <td>{{education.qualification}}</td>
-        <td>{{education.yearOfGraduation}}</td>
-        <td>{{education.instituteName}}</td>
+        <td><input type="text" ng-model="education.qualification"/></td>
+        <td><input type="text" ng-model="education.yearOfGraduation"/></td>
+        <td><input type="text" ng-model="education.instituteName"/></td>
+        <td><button type="button" onclick="deleteEducation(education)" class="btn btn-warning">-</button></td>
     </tr>
 </table>
