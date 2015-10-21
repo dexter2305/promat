@@ -8,7 +8,8 @@ angular.module('apiService', ['ngResource'])
             id: "@id"
         },
         {
-            "update": {method: "PUT"}
+            "update": {method: "PUT"},
+            "query":  {method: "GET", isArray:true},
         }
     );
 });

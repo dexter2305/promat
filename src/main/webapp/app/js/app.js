@@ -25,7 +25,7 @@ angular.module('PromatApp', ['apiService','ngRoute'])
 .controller('AddCandidateController', function($scope, Candidates){
     $scope.addCandidate = function(candidate){
         Candidates.save(candidate);
-        $scope.message = candidate.name + " created successfully."
+        $scope.message = candidate.name + " created successfully.";
 
     };
 
@@ -58,17 +58,19 @@ angular.module('PromatApp', ['apiService','ngRoute'])
     this.init($routeParams.candidateId);
 
     $scope.updateCandidate = function(candidate){
-        //Candidates.save(candidate);
         candidate.$update();
-        $scope.message = candidate.name + " updated successfully."
+        $scope.message = candidate.name + " updated successfully.";
     };
 
+    $scope.deleteEducation = function(){
+        console.log("delete education invoked for some education ");
+    };
 
 })
 .controller('HomeViewController', function(){
 
 })
-.controller('TabNavigationController', function(){
+.controller('TabNavigationController', function($scope){
         // Init tab index
         this.tab = 0;
         // setting tab index
@@ -77,10 +79,7 @@ angular.module('PromatApp', ['apiService','ngRoute'])
         };
         // checking tab index
         this.isTab = function (tabIdx) {
-            return this.tab == tabIdx;
-        };
-        $scope.deleteEducation = function(education){
-            console.log(education.qualification);
+            return this.tab === tabIdx;
         };
 })
 .controller('SkinToneOptionsController',function($scope){
@@ -107,7 +106,7 @@ angular.module('PromatApp', ['apiService','ngRoute'])
         "BPOSITIVE",
         "BNEGATIVE",
         "ABPOSITIVE",
-        "ABNEGATIVE",
+        "ABNEGATIVE"
     ];
 })
 ;
