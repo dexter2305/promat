@@ -1,0 +1,40 @@
+<h2>{{candidate.name}}</h2>
+<div class="row">
+	<div class="col-sm-3">
+		<!--left col-->
+		<ul class="list-group">
+			<li class="list-group-item text-muted" contenteditable="false">Profile</li>
+			<li><img title="profile image" class="img-rectangle img-responsive" alt="Display Pic (todo)" ng-src="{{candiate.displayPicture}}"></li>
+			<li class="list-group-item text-right"><span class="pull-left"><strong class="">Age</strong></span> TODO </li>
+			<li class="list-group-item text-right">Single (todo)</li>
+			<li class="list-group-item text-right"><span class="pull-left"><strong class="">Phone</strong></span>{{candidate.contact.phoneNumber}}</li>
+			<li class="list-group-item text-right"><span class="pull-left"><strong class="">Email</strong></span>{{candidate.contact.email}}</li>
+			<li class="list-group-item text-right"><span class="pull-left"><strong class="">Residing in </strong></span>Bangalore</li>
+		</ul>
+	</div>
+</div>
+<!-- article>
+	<table class="table table-responsive">
+		<tr>
+			<td>
+				<div ng-include="'app/views/candidate-profile-basic-info.html'" />
+			</td>
+			<td>
+				<div ng-include="'app/views/candidate-profile-physique-info.html'" />
+			</td>
+		</tr>
+
+	</table>
+	<table class="table table-responsive">
+		<tr>
+			<td>
+				<div ng-include="'app/views/candidate-profile-education-info.html'" />
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div ng-include="'app/views/candidate-profile-qualification-info.html'" />
+			</td>
+		</tr>
+	</table>
+</article -->
