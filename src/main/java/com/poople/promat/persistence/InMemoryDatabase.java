@@ -91,7 +91,7 @@ public class InMemoryDatabase {
         Candidate rob = new Candidate();
         rob.setGender(Candidate.Gender.MALE);
         rob.setName("Rob Stark");
-        long id = IDGenerator.INSTANCE.getUUID();
+        long id = 12;
         rob.setId(id);
         Contact robContact = rob.getContact();
         robContact.setEmail("robStark@got.com");

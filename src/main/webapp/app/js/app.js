@@ -64,11 +64,13 @@ angular.module('PromatApp', ['apiService', 'ngRoute'])
 			$scope.message = candidate.name + " updated successfully.";
 		};
 
-		$scope.addNewEducation = function () {
-			console.log("Add new education invoked... ");
+		$scope.addNewEducation = function (candidate) {
+			emptyEducation = new Object();
+			candidate.educations.push(emptyEducation);
+			console.log("Add new education invoked for candidate id " + candidate.name);
 		};
-		$scope.removeThisEducation = function () {
-			console.log("delete education invoked... ");
+		$scope.removeThisEducation = function (education) {
+			console.log("delete education invoked for education " + education.qualification);
 		};
 	})
 	.controller('HomeViewController', function () {
@@ -88,28 +90,28 @@ angular.module('PromatApp', ['apiService', 'ngRoute'])
 	})
 	.controller('SkinToneOptionsController', function ($scope) {
 		$scope.skinTones = [
-        "DARK",
-        "MODERATE",
-        "FAIR"
-    ];
+			"DARK",
+			"MODERATE",
+			"FAIR"
+    	];
 	})
 	.controller('BodyTypeOptionsController', function ($scope) {
 		$scope.bodyTypes = [
-        "NORMAL",
-        "SLIM",
-        "ATHLETIC",
-        "HEAVY"
-    ];
+			"NORMAL",
+			"SLIM",
+			"ATHLETIC",
+			"HEAVY"
+    	];
 	})
 	.controller('BloodGroupOptionsController', function ($scope) {
 		$scope.bloodGroups = [
-        "OPOSITIVE",
-        "ONEGATIVE",
-        "APOSITIVE",
-        "ANEGATIVE",
-        "BPOSITIVE",
-        "BNEGATIVE",
-        "ABPOSITIVE",
-        "ABNEGATIVE"
-    ];
+			"OPOSITIVE",
+			"ONEGATIVE",
+			"APOSITIVE",
+			"ANEGATIVE",
+			"BPOSITIVE",
+			"BNEGATIVE",
+			"ABPOSITIVE",
+			"ABNEGATIVE"
+    	];
 	});
