@@ -108,7 +108,12 @@ public class InMemoryDatabase {
         ug.setQualification("BE (Computer Science)");
         ug.setInstituteName("PSG, Coimbatore");
         ug.setYearOfGraduation(2003);
+        Education pg = new Education();
+        pg.setInstituteName("BITS, Pilani");
+        pg.setQualification("ME (Comp Sci)");
+        pg.setYearOfGraduation(2010);
         rob.getEducations().add(ug);
+        rob.getEducations().add(pg);
         return rob;
     }
 }

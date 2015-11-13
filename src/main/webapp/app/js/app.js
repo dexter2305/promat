@@ -67,10 +67,17 @@ angular.module('PromatApp', ['apiService', 'ngRoute'])
 		$scope.addNewEducation = function (candidate) {
 			emptyEducation = new Object();
 			candidate.educations.push(emptyEducation);
-			console.log("Add new education invoked for candidate id " + candidate.name);
 		};
-		$scope.removeThisEducation = function (education) {
-			console.log("delete education invoked for education " + education.qualification);
+		$scope.removeThisEducation = function (candidate, education) {
+			var educationsByCandidate = candidate.educations; 
+			for (var index = 0; index < educationsByCandidate.length; index++){
+				var curEducation = educationsByCandidate[index];
+				if (education.qualification === curEducation.qualification && education.yearOfGraduation === curEducation.yearOfGraduation && education.instituteName === curEducation.instituteName){
+						educationsByCandidate.splice(index, 1);
+						console.log("removing - " + curEducation.qualification);
+						break;
+				}
+			}
 		};
 	})
 	.controller('HomeViewController', function () {
