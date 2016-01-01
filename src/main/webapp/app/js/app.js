@@ -3,7 +3,7 @@ angular.module('PromatApp', ['apiService', 'ngRoute'])
 .config(['$routeProvider', function ($routeProvider) {
 		$routeProvider
 			.when('/addCandidate', {
-				templateUrl: 'app/views/candidate-profile.html',
+				templateUrl: 'app/views/candidate-profile-sp-add.html',
 				controller: 'AddCandidateController'
 			})
 			.when('/candidates', {
@@ -23,6 +23,15 @@ angular.module('PromatApp', ['apiService', 'ngRoute'])
 			});
   }])
 	.controller('AddCandidateController', function ($scope, Candidates) {
+
+		$scope.init = function(){
+			$scope.isNewProfile = true;
+			$scope.candidate = new Object();
+			$scope.candidate.educations = [];
+			$scope.candidate.occupations = [];
+			
+		};
+	
 		$scope.addCandidate = function (candidate) {
 			Candidates.save(candidate);
 			$scope.message = candidate.name + " created successfully.";
@@ -32,7 +41,34 @@ angular.module('PromatApp', ['apiService', 'ngRoute'])
 		$scope.reset = function () {
 			$scope.candidate = new Object();
 		};
-		$scope.isNewProfile = true;
+	
+		$scope.addNewEducation = function (candidate) {
+			emptyEducation = new Object();
+			candidate.educations.push(emptyEducation);
+		};
+		$scope.removeThisEducation = function (candidate, education) {
+			var educationsByCandidate = candidate.educations; 
+			for (var index = 0; index < educationsByCandidate.length; index++){
+				var curEducation = educationsByCandidate[index];
+				if (education.qualification === curEducation.qualification && education.yearOfGraduation === curEducation.yearOfGraduation && education.instituteName === curEducation.instituteName){
+						educationsByCandidate.splice(index, 1);
+						console.log("removing - " + curEducation.qualification);
+						break;
+				}
+			}
+		};	
+
+		$scope.addNewOccupation = function (candidate) {
+			emptyOccupation = new Object();
+			candidate.occupations.push(emptyOccupation);
+		};
+	
+		$scope.removeThisOccupation = function(candidate, occupation){
+			console.log("to be implemented");
+			
+		};
+	
+		$scope.init();
 	})
 	.controller('ShowCandidatesController', function ($scope, Candidates) {
 		this.init = function () {
@@ -74,11 +110,28 @@ angular.module('PromatApp', ['apiService', 'ngRoute'])
 				var curEducation = educationsByCandidate[index];
 				if (education.qualification === curEducation.qualification && education.yearOfGraduation === curEducation.yearOfGraduation && education.instituteName === curEducation.instituteName){
 						educationsByCandidate.splice(index, 1);
-						console.log("removing - " + curEducation.qualification);
 						break;
 				}
 			}
 		};
+	
+		$scope.addNewOccupation = function (candidate) {
+			emptyOccupation = new Object();
+			candidate.occupations.push(emptyOccupation);
+		};
+	
+		$scope.removeThisOccupation = function(candidate, occupation){
+			var occupationsByCandidate = candidate.occupations; 
+			for (var index = 0; index < occupationsByCandidate.length; index++){
+				var curOccupation = occupationsByCandidate[index];
+				if (occupation.company === curOccupation.company && occupation.yearOfLeavingCompany === curOccupation.yearOfLeavingCompany && occupation.companyLocation === curOccupation.companyLocation){
+						occupationsByCandidate.splice(index, 1);
+						break;
+				}
+			}
+		};	
+	
+	
 	})
 	.controller('HomeViewController', function () {
 

@@ -1,9 +1,6 @@
 package com.poople.promat.persistence;
 
-import com.poople.promat.models.Candidate;
-import com.poople.promat.models.Contact;
-import com.poople.promat.models.Education;
-import com.poople.promat.models.Physique;
+import com.poople.promat.models.*;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -114,6 +111,11 @@ public class InMemoryDatabase {
         pg.setYearOfGraduation(2010);
         rob.getEducations().add(ug);
         rob.getEducations().add(pg);
+        Occupation occupation = new Occupation();
+        occupation.setCompany("Akamai Technologies");
+        occupation.setYearOfLeavingCompany(2020);
+        occupation.setCompanyLocation("Bangalore");
+        rob.getOccupations().add(occupation);
         return rob;
     }
 }

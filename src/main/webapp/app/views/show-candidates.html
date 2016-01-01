@@ -4,12 +4,7 @@
     </span>
     <hr/>
     <table class="table table-responsive table-hover">
-        <tr>
-            <td><strong>Candidate ID</strong></td>
-            <td><strong>Candidate Name</strong></td>
-            <td><strong>Gender</strong></td>
-            <td><strong>Action</strong></td>
-        </tr>
+
         <tr ng-repeat="candidate in candidates | filter: query">
             <td>
                 {{candidate.id}}
@@ -21,6 +16,9 @@
             </td>
             <td>
                 {{candidate.gender}}
+            </td>
+			<td>
+                <a role="button" ng-click="findMatches(candidate)" class="btn btn-success">Find Match</a>
             </td>
             <td>
                 <a role="button" ng-click="deleteCandidate(candidate)" class="btn btn-danger">Delete</a>

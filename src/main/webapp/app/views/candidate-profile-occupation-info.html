@@ -1,1 +1,43 @@
-<h4>Occupation details</h4>
+<table>
+	<tr>
+		<td>
+			<h3>Occupation</h3></td>
+		<td></td>
+		<td></td>
+		<td>
+			<button type="button" ng-click="addNewOccupation(candidate)" class="btn btn-sm btn-success">
+				<span class="glyphicon glyphicon-plus"></span> Add occupation
+			</button>
+		</td>
+	</tr>
+</table>
+
+<table class="table table-condensed table-bordered">
+	<thead>
+		<tr>
+			<td>
+				<h4>Company Name</h4></td>
+			<td>
+				<h4>Location</h4></td>
+			<td>
+				<h4>Year</h4></td>
+			<td></td>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="occupation in candidate.occupations">
+			<td>
+				<input type="text" ng-model="occupation.company" />
+			</td>
+			<td>
+				<input type="text" ng-model="occupation.companyLocation" />
+			</td>
+			<td>
+				<input type="text" ng-model="occupation.yearOfLeavingCompany" />
+			</td>
+			<td>
+				<button type="button" class="btn btn-danger btn-sm" ng-click="removeThisOccupation(candidate, occupation)"><span class="glyphicon glyphicon-remove" /></button>
+			</td>
+		</tr>
+	</tbody>
+</table>

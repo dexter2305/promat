@@ -17,10 +17,13 @@ public class Candidate {
 
     private Set<Education> educations;
 
+    private Set<Occupation> occupations;
+
     public Candidate() {
         contact = new Contact();
         physique = new Physique();
         educations = new LinkedHashSet<>();
+        occupations = new LinkedHashSet<>();
     }
 
     public long getId() {
@@ -67,8 +70,8 @@ public class Candidate {
         return educations;
     }
 
-    public void setEducations(Set<Education> educations) {
-        this.educations = educations;
+    public Set<Occupation> getOccupations() {
+        return occupations;
     }
 
     public enum Gender {

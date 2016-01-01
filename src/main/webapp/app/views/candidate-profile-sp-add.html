@@ -1,0 +1,25 @@
+<h2><strong>Add Profile</strong>&nbsp; &nbsp; <a role="button" ng-click="addCandidate(candidate)" class="btn btn-large btn-success">Save</a></h2>
+
+<div class="row">
+	<!-- Basic info-->
+
+	<div class="col-sm-6" ng-include="'app/views/candidate-profile-basic-info.html'">
+	</div>
+
+	<!-- Physique info -->
+
+	<div class="col-sm-6" ng-include="'app/views/candidate-profile-physique-info.html'">
+	</div>
+
+</div>
+<div class="row">
+	<!-- Education -->
+	<div class="col-sm-6">
+		<div ng-include="'app/views/candidate-profile-education-info.html'"></div>
+	</div>
+	<!-- Occupation -->
+	<div class="col-sm-6">
+		<div ng-include="'app/views/candidate-profile-occupation-info.html'"></div>
+	</div>
+
+</div>

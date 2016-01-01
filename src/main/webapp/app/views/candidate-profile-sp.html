@@ -1,4 +1,4 @@
-<h2><strong>{{candidate.name}}</strong> &nbsp; &nbsp; <a role="button" ng-click="updateCandidate(candidate)" class="btn btn-large btn-success">Save</a></h2>
+<h2><strong>{{candidate.name}}</strong> &nbsp; &nbsp; <a role="button" ng-click="updateCandidate(candidate)" class="btn btn-large btn-success">Save</a> &nbsp; &nbsp; <a role="button" ng-click="findmatch(candidate)" class="btn btn-large btn-success">Find Match</a></h2>
 <hr/>
 <div class="row">
 	<div class="col-sm-2">
@@ -81,13 +81,13 @@
 			<tr>
 				<td><h3>Occupation</h3></td>
 				<td>
-					<button type="button" ng-click="addNewEducation(candidate)" class="btn btn-sm btn-success">
+					<button type="button" ng-click="addNewOccupation(candidate)" class="btn btn-sm btn-success">
 						<span class="glyphicon glyphicon-plus"></span> Add Occupation
 					</button>
 				</td>
 			</tr>
 		</table>
-		<table class="table table-condensed">
+		<table class="table table-condensed table-bordered">
 			<thead>
 				<tr>
 					<td>
@@ -100,18 +100,18 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr ng-repeat="education in candidate.educations">
+				<tr ng-repeat="occupation in candidate.occupations">
 					<td>
-						<input type="text" ng-model="education.qualification" />
+						<input type="text" ng-model="occupation.company" />
 					</td>
 					<td>
-						<input type="text" ng-model="education.yearOfGraduation" />
+						<input type="text" ng-model="occupation.companyLocation" />
 					</td>
 					<td>
-						<input type="text" ng-model="education.instituteName" />
+						<input type="text" ng-model="occupation.yearOfLeavingCompany" />
 					</td>
 					<td>
-						<button type="button" class="btn btn-danger btn-sm" ng-click="removeThisEducation(candidate, education)"><span class="glyphicon glyphicon-remove" /></button>
+						<button type="button" class="btn btn-danger btn-sm" ng-click="removeThisOccupation(candidate, occupation)"><span class="glyphicon glyphicon-remove" /></button>
 					</td>
 				</tr>
 			</tbody>
