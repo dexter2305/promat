@@ -1,146 +1,146 @@
-<h2><strong>{{candidate.name}}</strong> &nbsp; &nbsp; <a role="button" ng-click="updateCandidate(candidate)" class="btn btn-large btn-success">Save</a> &nbsp; &nbsp; <a role="button" ng-click="findmatch(candidate)" class="btn btn-large btn-success">Find Match</a></h2>
-<hr/>
-<div class="row">
-	<div class="col-sm-2">
-		<h3>Profile</h3>
-		<table class="table table-bordered table-condensed">
-			<tbody>
-				<tr>
-					<td><img title="profile image" class="img-rectangle img-responsive" alt="Display Pic (todo)" ng-src="{{candiate.displayPicture}}"></td>
-				</tr>
-				<tr>
-					<td><strong>Marital Status</strong></td>
-					<td>Single</td>
-				</tr>
-				<tr>
-					<td><strong>Gender</strong></td>
-					<td>{{candidate.gender}}</td>
-				</tr>
-				<tr>
-					<td><strong>Age</strong></td>
-					<td>26</td>
-				</tr>
-				<tr>
-					<td><strong>Residing in</strong></td>
-					<td>Chennai</td>
-				</tr>
-				<tr>
-					<td><strong>Phone</strong></td>
-					<td><input type="tel" ng-model="candidate.contact.phoneNumber"/></td>
-				</tr>
-				<tr>
-					<td><strong>Email</strong></td>
-					<td><input type="email" ng-model="candidate.contact.email"/></td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-	<div class="col-sm-5">
-		<table>
-			<tr>
-				<td><h3>Education</h3></td>
-				<td>
-					<button type="button" ng-click="addNewEducation(candidate)" class="btn btn-sm btn-success">
-						<span class="glyphicon glyphicon-plus"></span> Add Education
-					</button>
-				</td>
-			</tr>
-		</table>
-		<table class="table table-condensed table-bordered">
-			<thead>
-				<tr>
-					<td>
-						<h4>Qualification</h4></td>
-					<td>
-						<h4>Gradution year</h4></td>
-					<td>
-						<h4>Institution</h4></td>
-					<td></td>
-				</tr>
-			</thead>
-			<tbody>
-				<tr ng-repeat="education in candidate.educations">
-					<td>
-						<input type="text" ng-model="education.qualification" />
-					</td>
-					<td>
-						<input type="text" ng-model="education.yearOfGraduation" />
-					</td>
-					<td>
-						<input type="text" ng-model="education.instituteName" />
-					</td>
-					<td>
-						<button type="button" class="btn btn-danger btn-sm" ng-click="removeThisEducation(candidate, education)"><span class="glyphicon glyphicon-remove" /></button>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-	<div class="col-sm-5">
-		<table>
-			<tr>
-				<td><h3>Occupation</h3></td>
-				<td>
-					<button type="button" ng-click="addNewOccupation(candidate)" class="btn btn-sm btn-success">
-						<span class="glyphicon glyphicon-plus"></span> Add Occupation
-					</button>
-				</td>
-			</tr>
-		</table>
-		<table class="table table-condensed table-bordered">
-			<thead>
-				<tr>
-					<td>
-						<h4>Company</h4></td>
-					<td>
-						<h4>Gradution year</h4></td>
-					<td>
-						<h4>Institution</h4></td>
-					<td></td>
-				</tr>
-			</thead>
-			<tbody>
-				<tr ng-repeat="occupation in candidate.occupations">
-					<td>
-						<input type="text" ng-model="occupation.company" />
-					</td>
-					<td>
-						<input type="text" ng-model="occupation.companyLocation" />
-					</td>
-					<td>
-						<input type="text" ng-model="occupation.yearOfLeavingCompany" />
-					</td>
-					<td>
-						<button type="button" class="btn btn-danger btn-sm" ng-click="removeThisOccupation(candidate, occupation)"><span class="glyphicon glyphicon-remove" /></button>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-</div>
+<body>
+    <article>
+        <div class="col-md-offset-1 col-md-10">
+            <div class="container-fluid">
+                <div class="row">
+                    <div>
+                        <h2><strong>{{candidate.name}}</strong> &nbsp; &nbsp; <a role="button" ng-click="updateCandidate(candidate)" class="btn btn-large btn-success">Save</a> &nbsp; &nbsp; <a role="button" ng-click="findmatch(candidate)" class="btn btn-large btn-success">Find Match</a></h2>
+                        <hr/>
+                    </div>
+                </div>
+                <div class="row">
 
-<!-- article>
-	<table class="table table-responsive">
-		<tr>
-			<td>
-				<div ng-include="'app/views/candidate-profile-basic-info.html'" />
-			</td>
-			<td>
-				<div ng-include="'app/views/candidate-profile-physique-info.html'" />
-			</td>
-		</tr>
+                    <div class="col-md-3">
+                        <h3>Profile</h3>
+                        <img title="profile image" class="img-rectangle img-responsive" alt="Display Pic (todo)" ng-src="{{candiate.displayPicture}}">
+                    </div>
+                    <div class="col-md-9">
+                        <table class="table table-bordered table-condensed">
+                            <tbody>
+                                <tr>
+                                    <td><strong>Marital Status</strong></td>
+                                    <td>Single</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Gender</strong></td>
+                                    <td>{{candidate.gender}}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Age</strong></td>
+                                    <td>26</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Residing in</strong></td>
+                                    <td>Chennai</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Phone</strong></td>
+                                    <td>
+                                        <input type="tel" ng-model="candidate.contact.phoneNumber" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email</strong></td>
+                                    <td>
+                                        <input type="email" ng-model="candidate.contact.email" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div>
+                        <table>
+                            <tr>
+                                <td>
+                                    <h3>Education</h3></td>
+                                <td>
 
-	</table>
-	<table class="table table-responsive">
-		<tr>
-			<td>
-				<div ng-include="'app/views/candidate-profile-education-info.html'" />
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<div ng-include="'app/views/candidate-profile-qualification-info.html'" />
-			</td>
-		</tr>
-	</table>
-</article -->
+                                </td>
+                            </tr>
+                        </table>
+                        <table class="table table-condensed table-bordered">
+                            <thead>
+                                <tr>
+                                    <td>
+                                        <h4>Qualification</h4></td>
+                                    <td>
+                                        <h4>Gradution year</h4></td>
+                                    <td>
+                                        <h4>Institution</h4></td>
+                                    <td>
+                                        <button type="button" ng-click="addNewEducation(candidate)" class="btn btn-sm btn-success">
+                                            <span class="glyphicon glyphicon-plus"></span> Add Education
+                                        </button>
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="education in candidate.educations">
+                                    <td>
+                                        <input type="text" ng-model="education.qualification" />
+                                    </td>
+                                    <td>
+                                        <input type="text" ng-model="education.yearOfGraduation" />
+                                    </td>
+                                    <td>
+                                        <input type="text" ng-model="education.instituteName" />
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm" ng-click="removeThisEducation(candidate, education)"><span class="glyphicon glyphicon-remove" /></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div>
+                        <table>
+                            <tr>
+                                <td>
+                                    <h3>Occupation</h3></td>
+                                <td>
+                                </td>
+                            </tr>
+                        </table>
+                        <table class="table table-condensed table-bordered">
+                            <thead>
+                                <tr>
+                                    <td>
+                                        <h4>Company</h4></td>
+                                    <td>
+                                        <h4>Gradution year</h4></td>
+                                    <td>
+                                        <h4>Institution</h4></td>
+                                    <td>
+                                        <button type="button" ng-click="addNewOccupation(candidate)" class="btn btn-sm btn-success">
+                                            <span class="glyphicon glyphicon-plus"></span> Add Occupation
+                                        </button>
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="occupation in candidate.occupations">
+                                    <td>
+                                        <input type="text" ng-model="occupation.company" />
+                                    </td>
+                                    <td>
+                                        <input type="text" ng-model="occupation.companyLocation" />
+                                    </td>
+                                    <td>
+                                        <input type="text" ng-model="occupation.yearOfLeavingCompany" />
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm" ng-click="removeThisOccupation(candidate, occupation)"><span class="glyphicon glyphicon-remove" /></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</body>
