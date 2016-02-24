@@ -3,8 +3,8 @@ package com.poople.promat.resources;
 
 import com.poople.promat.models.Candidate;
 import com.poople.promat.persistence.InMemoryDatabase;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -14,9 +14,9 @@ import java.util.Collection;
 
 @Path("candidates")
 public class CandidateResource {
-    private InMemoryDatabase db = InMemoryDatabase.INSTANCE;
 
-    private Logger logger = LogManager.getLogger("CandidateResource");
+    private InMemoryDatabase db = InMemoryDatabase.INSTANCE;
+    private static final Log logger = LogFactory.getLog(CandidateResource.class);
 
     @GET
     @Path("{id}")
