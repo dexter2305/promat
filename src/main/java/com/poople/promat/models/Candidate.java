@@ -2,6 +2,8 @@ package com.poople.promat.models;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Candidate {
 
@@ -75,7 +77,23 @@ public class Candidate {
     }
 
     public enum Gender {
-        FEMALE, MALE
+        FEMALE, MALE;
+
+        public static Gender fromString(String s) {
+            if (s == null || s.isEmpty()) return null;
+            Pattern femalePattern = Pattern.compile("female".toLowerCase(), Pattern.CASE_INSENSITIVE);
+            Pattern malePattern = Pattern.compile("male".toLowerCase(), Pattern.CASE_INSENSITIVE);
+            Matcher femaleMatcher = femalePattern.matcher(s);
+            Matcher maleMatcher = malePattern.matcher(s);
+
+            if (femaleMatcher.find()) {
+                return Gender.FEMALE;
+            } else if (maleMatcher.find()) {
+                return Gender.MALE;
+            }
+            return null;
+        }
+
     }
 
     @Override
