@@ -97,7 +97,7 @@ public class InMemoryDatabase {
         Physique robPhysique = rob.getPhysique();
         robPhysique.setBloodGroup(Physique.Bloodgroup.ABPOSITIVE);
         robPhysique.setBodyType(Physique.BodyType.ATHLETIC);
-        robPhysique.setHeight(170);
+        robPhysique.setHeight(170l);
         robPhysique.setWeight(70);
         robPhysique.setSkinTone(Physique.SkinTone.FAIR);
         rob.setPhysique(robPhysique);

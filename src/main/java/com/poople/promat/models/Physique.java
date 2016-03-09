@@ -1,8 +1,8 @@
 package com.poople.promat.models;
 
 public class Physique {
-    private int height;
-    private int weight;
+    private Long heightInCm;
+    private long weightInKg;
 
     private BodyType bodyType;
 
@@ -13,20 +13,20 @@ public class Physique {
     Physique() {
     }
 
-    public int getHeight() {
-        return height;
+    public Long getHeight() {
+        return heightInCm;
     }
 
-    public void setHeight(int height) {
-        this.height = height;
+    public void setHeight(Long height) {
+        this.heightInCm = height;
     }
 
-    public int getWeight() {
-        return weight;
+    public long getWeight() {
+        return weightInKg;
     }
 
     public void setWeight(int weight) {
-        this.weight = weight;
+        this.weightInKg = weight;
     }
 
     public BodyType getBodyType() {
@@ -58,7 +58,22 @@ public class Physique {
     }
 
     public enum SkinTone {
-        DARK, MODERATE, FAIR
+        DARK, MODERATE, FAIR;
+
+        public static SkinTone fromString(String s) {
+            if (s == null || s.isEmpty()) return null;
+            SkinTone tone;
+            try {
+                tone = SkinTone.valueOf(s);
+            } catch (IllegalArgumentException ie) {
+                if (s.equalsIgnoreCase("ok")) tone = SkinTone.MODERATE;
+                else if (s.equalsIgnoreCase("fair")) tone = SkinTone.FAIR;
+                else if (s.equalsIgnoreCase("dark")) tone = SkinTone.DARK;
+                else tone = null;
+            }
+            return tone;
+        }
+
     }
 
     public enum Bloodgroup {
@@ -85,6 +100,36 @@ public class Physique {
             String s = super.toString();
             return s.substring(0, 1) + s.substring(1).toLowerCase();
         }
+
+        public static Bloodgroup fromString(String valueAsString) {
+            if (valueAsString == null || valueAsString.trim().isEmpty()) return null;
+            Bloodgroup bloodGroup = null;
+            try {
+                bloodGroup = Bloodgroup.valueOf(valueAsString);
+            } catch (IllegalArgumentException ie) {
+                valueAsString = valueAsString.trim();
+                valueAsString = valueAsString.replaceAll(" ", "");
+                Bloodgroup[] values = Bloodgroup.values();
+                for (Bloodgroup group : values) {
+                    if (group.toString().equalsIgnoreCase(valueAsString)) {
+                        bloodGroup = group;
+                        break;
+                    }
+                }
+            }
+            return bloodGroup;
+        }
     }
 
+    @Override
+    public String toString() {
+        String s = "physique={" +
+                "height='" + heightInCm + "\'" +
+                "weight='" + weightInKg + "\'" +
+                "skinTone='" + (skinTone != null ? skinTone.toString() : "") + "\'" +
+                //"bloodGroup='" + bloodGroup != null ? bloodGroup.toString() : "" + "\'" +
+                //"bodyType='" + bodyType != null ? bodyType.toString() : "" + "\'" +
+                "}";
+        return s;
+    }
 }

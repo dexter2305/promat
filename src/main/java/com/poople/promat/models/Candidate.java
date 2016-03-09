@@ -99,9 +99,10 @@ public class Candidate {
     @Override
     public String toString() {
         return "Candidate{" +
-                "name='" + name + '\'' +
-                ", id=" + id + '\'' +
-                ", gender=" + gender +
+                "id='" + id + "\'," +
+                "name='" + name + "\'," +
+                "gender=" + gender + "\'," +
+                physique.toString() +
                 '}';
     }
 }

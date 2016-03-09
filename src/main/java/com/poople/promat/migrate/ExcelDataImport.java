@@ -1,6 +1,7 @@
 package com.poople.promat.migrate;
 
 import com.poople.promat.models.Candidate;
+import com.poople.promat.models.Physique;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Cell;
@@ -9,9 +10,11 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 public class ExcelDataImport {
 
@@ -27,6 +30,8 @@ public class ExcelDataImport {
         Set<Report> reports = new LinkedHashSet<>();
         FileInputStream fileInputStream = new FileInputStream(fileName);
         XSSFWorkbook workbook = new XSSFWorkbook(fileInputStream);
+        final String csvFileName = fileName.substring(0, fileName.indexOf(".")) + ".csv";
+        FileWriter csvWriter = new FileWriter(csvFileName);
         logger.info(fileName + " read completed.");
         logger.info("Number of sheets:" + workbook.getNumberOfSheets());
         Collection<Candidate> candidates = new ArrayList<>();
@@ -44,8 +49,9 @@ public class ExcelDataImport {
                 if (candidate != null) {
                     candidates.add(candidate);
                     beanCounter++;
-                    logger.debug((sheetCounter) + "->" + (row.getRowNum()) + " -> " + candidate.getName());
+                    logger.debug((sheetCounter) + "->" + (row.getRowNum()) + " -> " + candidate.toString());
                 } else {
+                    writeAsCSV(csvWriter, row);
                     logger.error("Error while reading row @ " + (sheetCounter + 1) + "/" + (row.getRowNum()));
                 }
             }
@@ -55,6 +61,8 @@ public class ExcelDataImport {
             reports.add(report);
             sheetCounter++;
         }
+        csvWriter.flush();
+        csvWriter.close();
         logger.info("*** REPORT ***");
         long sumB = 0, sumR = 0;
         Iterator<Report> iterator = reports.iterator();
@@ -65,7 +73,27 @@ public class ExcelDataImport {
             sumR += report.numberOfRowsRead;
         }
         logger.info("Total beans loaded " + sumB + " from " + sumR + " rows.");
+        logger.info("All invalid records are recorded as CSV in " + csvFileName);
         return candidates;
+    }
+
+    private static void writeAsCSV(FileWriter writer, Row row) {
+        Iterator<Cell> cellIterator = row.cellIterator();
+        final StringBuilder rowBuilder = new StringBuilder();
+        rowBuilder.append(row.getSheet().getSheetName() + " - row :" + (row.getRowNum() + 1)).append("->").append("|");
+        while (cellIterator.hasNext()) {
+            Cell cell = cellIterator.next();
+            String cellValue = getValueAsString(cell);
+            rowBuilder.append(cellValue).append("|");
+        }
+        String rowAsCSV = rowBuilder.toString();
+        try {
+            writer.write(rowAsCSV);
+            writer.write("\n");
+            writer.flush();
+        } catch (IOException e) {
+            logger.error("Exception while writing " + row.getRowNum() + " to error file. ", e);
+        }
     }
 
     private static Candidate getCandidateBean(Row row) {
@@ -74,8 +102,24 @@ public class ExcelDataImport {
         Candidate candidate = new Candidate();
         candidate.setName(getValueAsString(row.getCell(ExcelColumns.NAME.asInt())));
         candidate.setGender(Candidate.Gender.fromString(getValueAsString(row.getCell(ExcelColumns.GENDER.asInt()))));
-
+        candidate.getPhysique().setSkinTone(Physique.SkinTone.fromString(getValueAsString(row.getCell(ExcelColumns.SKINTONE.asInt()))));
+        candidate.getPhysique().setBloodGroup(Physique.Bloodgroup.fromString(getValueAsString(row.getCell(ExcelColumns.BLOODGROUP.asInt()))));
+        Long heightInCms = getHeightInCms(getValueAsString(row.getCell(ExcelColumns.HEIGHT.asInt())));
+        candidate.getPhysique().setHeight(heightInCms);
         return candidate;
+    }
+
+    private static Long getHeightInCms(String heightInFeet){
+        if (heightInFeet == null  || heightInFeet.trim().isEmpty()) return null;
+
+        try{
+            Double h = Double.parseDouble(heightInFeet);
+            h = h * 30;
+            return h.longValue();
+        }catch(NumberFormatException nfe){
+            return null;
+        }
+
     }
 
     private static String getValueAsString(Cell cell) {
@@ -88,11 +132,6 @@ public class ExcelDataImport {
     }
 
     private static boolean areMandatoryFieldsPresent(Row row) {
-        boolean arePresent;
-
-        Cell nameCell = row.getCell(ExcelColumns.NAME.asInt());
-        Cell genderCell = row.getCell(ExcelColumns.GENDER.asInt());
-
         Request nameRequest = new Request(row.getCell(ExcelColumns.NAME.asInt()), ExcelColumns.NAME);
         Request genderRequest = new Request(row.getCell(ExcelColumns.GENDER.asInt()), ExcelColumns.GENDER);
         List<Request> mandatoryFields = Arrays.asList(new Request[]{nameRequest, genderRequest});
@@ -109,24 +148,6 @@ public class ExcelDataImport {
         } else {
             return true;
         }
-
-        /*
-        if (!isCellValid(nameCell)){
-            arePresent = false;
-            messagebuilder.append("<NAME>");
-        }else{
-            arePresent = true;
-        }
-
-
-        if (!isCellValid(genderCell)){
-            arePresent = arePresent & false;
-            messagebuilder.append("<GENDER>");
-        }
-        if (!arePresent)
-        logger.error("Row " + row.getRowNum() + " has following invalid properties " + messagebuilder.toString());
-        return arePresent;
-        */
     }
 
 
@@ -162,7 +183,10 @@ public class ExcelDataImport {
 
     enum ExcelColumns {
         GENDER(2),
-        NAME(3);
+        NAME(3),
+        SKINTONE(20),
+        HEIGHT(21),
+        BLOODGROUP(22);
         private int columnIndex;
 
         ExcelColumns(int columnIndex) {
