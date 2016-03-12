@@ -53,8 +53,8 @@ public class CandidateResourceTest extends JerseyTest {
         Candidate newCandidate = new Candidate();
         newCandidate.setName("Tyrion Lannister");
         newCandidate.setGender(Candidate.Gender.MALE);
-        newCandidate.getContact().setEmail("tyrion@got.com");
-        newCandidate.getContact().setPhoneNumber("123-456-789");
+        newCandidate.getContact().addEmailAddress("tyrion@got.com");
+        newCandidate.getContact().addPhoneNumber("123-456-789");
         Response response = target().path("candidates").request().post(Entity.entity(newCandidate, MediaType.APPLICATION_JSON_TYPE));
         Assert.assertEquals(200, response.getStatus());
     }

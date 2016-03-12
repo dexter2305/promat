@@ -28,8 +28,28 @@ public class CandidateTest {
         Assert.assertNotNull(candidate.getEducations());
     }
 
+    @Test
     public void testEducationsSizeMustBeZeroInitially(){
-        Assert.assertEquals(0, candidate.getEducations());
+        Assert.assertEquals(0, candidate.getEducations().size());
     }
 
+    @Test
+    public void testContactEmailEmptyInitially(){
+        Assert.assertFalse(candidate.getContact().hasEmailAddresses());
+    }
+
+    @Test
+    public void testContactPhoneNumberMustBeEmptyInitially(){
+        Assert.assertFalse(candidate.getContact().hasPhoneNumbers());
+    }
+
+    @Test
+    public void testNotesMustBeNonNull(){
+        Assert.assertNotNull(candidate.getNotes());
+    }
+
+    @Test
+    public void testNotesMustBeEmpty(){
+        Assert.assertEquals(0, candidate.getNotes().size());
+    }
 }

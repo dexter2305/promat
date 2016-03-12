@@ -29,5 +29,13 @@ public class Education {
         this.yearOfGraduation = yearOfGraduation;
     }
 
-
+    @Override
+    public String toString() {
+        StringBuilder contentBuilder = new StringBuilder();
+        contentBuilder
+                .append("{")
+                .append("qualification:").append(qualification)
+                .append("}");
+        return contentBuilder.toString();
+    }
 }

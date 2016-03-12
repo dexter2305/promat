@@ -1,11 +1,14 @@
 package com.poople.promat.models;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Candidate {
+
+    private String externalUserId;
 
     private long id;
 
@@ -21,11 +24,14 @@ public class Candidate {
 
     private Set<Occupation> occupations;
 
+    private Collection<Note> notes;
+
     public Candidate() {
         contact = new Contact();
         physique = new Physique();
         educations = new LinkedHashSet<>();
         occupations = new LinkedHashSet<>();
+        notes = new LinkedHashSet<>();
     }
 
     public long getId() {
@@ -76,6 +82,18 @@ public class Candidate {
         return occupations;
     }
 
+    public String getExternalUserId() {
+        return externalUserId;
+    }
+
+    public void setExternalUserId(String externalUserId) {
+        this.externalUserId = externalUserId;
+    }
+
+    public Collection<Note> getNotes() {
+        return notes;
+    }
+
     public enum Gender {
         FEMALE, MALE;
 
@@ -98,11 +116,28 @@ public class Candidate {
 
     @Override
     public String toString() {
-        return "Candidate{" +
-                "id='" + id + "\'," +
-                "name='" + name + "\'," +
-                "gender=" + gender + "\'," +
-                physique.toString() +
-                '}';
+        StringBuilder contentBuilder = new StringBuilder();
+        contentBuilder
+                .append("Candidate:{")
+                .append("id:").append("'").append(id).append("'").append(",")
+                .append("xId:").append("'").append(externalUserId).append("'").append(",")
+                .append("name:").append("'").append(name).append("'").append(",")
+                .append("gender:").append("'").append(gender).append("'").append(",")
+                .append(physique.toString()).append(",")
+                .append(contact.toString())
+                .append("education:[");
+        educations.forEach(education -> contentBuilder.append(education.toString()));
+        contentBuilder
+                .append("]")
+                .append("occupation:[");
+        occupations.forEach(occupation -> contentBuilder.append(occupation.toString()));
+        contentBuilder
+                .append("]")
+                .append("}")
+                .append("notes:[");
+        notes.forEach(note -> contentBuilder.append(note.toString()));
+        contentBuilder
+                .append("]");
+        return contentBuilder.toString();
     }
 }

@@ -78,8 +78,8 @@ public class InMemoryDatabase {
         long id = IDGenerator.INSTANCE.getUUID();
         yigrette.setId(id);
         Contact yContact = yigrette.getContact();
-        yContact.setEmail("yiggy@got.com");
-        yContact.setPhoneNumber("+91987912367");
+        yContact.addEmailAddress("yiggy@got.com");
+        yContact.addPhoneNumber("+91987912367");
         yigrette.setContact(yContact);
         return yigrette;
     }
@@ -91,8 +91,8 @@ public class InMemoryDatabase {
         long id = 12;
         rob.setId(id);
         Contact robContact = rob.getContact();
-        robContact.setEmail("robStark@got.com");
-        robContact.setPhoneNumber("+919879689123");
+        robContact.addEmailAddress("robStark@got.com");
+        robContact.addPhoneNumber("+919879689123");
         rob.setContact(robContact);
         Physique robPhysique = rob.getPhysique();
         robPhysique.setBloodGroup(Physique.Bloodgroup.ABPOSITIVE);

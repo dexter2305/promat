@@ -123,12 +123,12 @@ public class Physique {
 
     @Override
     public String toString() {
-        String s = "physique={" +
-                "height='" + heightInCm + "\'" +
-                "weight='" + weightInKg + "\'" +
-                "skinTone='" + (skinTone != null ? skinTone.toString() : "") + "\'" +
-                //"bloodGroup='" + bloodGroup != null ? bloodGroup.toString() : "" + "\'" +
-                //"bodyType='" + bodyType != null ? bodyType.toString() : "" + "\'" +
+        String s = "physique:{" +
+                "height:'" + heightInCm + "\'" +
+                "weight:'" + weightInKg + "\'" +
+                "skinTone:'" + (skinTone != null ? skinTone.toString() : "") + "\'" +
+                "bloodGroup:'" + (bloodGroup != null ? bloodGroup.toString() : "") + "\'" +
+                "bodyType:'" + (bodyType != null ? bodyType.toString() : "") + "\'" +
                 "}";
         return s;
     }

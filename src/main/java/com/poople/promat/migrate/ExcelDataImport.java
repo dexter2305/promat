@@ -1,12 +1,13 @@
 package com.poople.promat.migrate;
 
-import com.poople.promat.models.Candidate;
-import com.poople.promat.models.Physique;
+import com.poople.promat.models.*;
+import com.poople.promat.persistence.IDGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.util.SystemOutLogger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
@@ -14,7 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
 public class ExcelDataImport {
 
@@ -100,23 +101,106 @@ public class ExcelDataImport {
         if (row == null) return null;
         if (!areMandatoryFieldsPresent(row)) return null;
         Candidate candidate = new Candidate();
+        //Candidate::Id
+        candidate.setId(IDGenerator.INSTANCE.getUUID());
+        //Candidate::Name;
         candidate.setName(getValueAsString(row.getCell(ExcelColumns.NAME.asInt())));
+        //Candidate::gender
         candidate.setGender(Candidate.Gender.fromString(getValueAsString(row.getCell(ExcelColumns.GENDER.asInt()))));
+        //Physique::skinTone
         candidate.getPhysique().setSkinTone(Physique.SkinTone.fromString(getValueAsString(row.getCell(ExcelColumns.SKINTONE.asInt()))));
+        //Physique::bloodGroup
         candidate.getPhysique().setBloodGroup(Physique.Bloodgroup.fromString(getValueAsString(row.getCell(ExcelColumns.BLOODGROUP.asInt()))));
+        //Physique::height
         Long heightInCms = getHeightInCms(getValueAsString(row.getCell(ExcelColumns.HEIGHT.asInt())));
         candidate.getPhysique().setHeight(heightInCms);
+        Collection<String> phoneNumbers = getPhoneNumbers(new Cell[]{row.getCell(ExcelColumns.PHONE_1.asInt()), row.getCell(ExcelColumns.PHONE_2.asInt()), row.getCell(ExcelColumns.PHONE_3.asInt())});
+        //Contact::phoneNumbers
+        candidate.getContact().addPhoneNumbers(phoneNumbers);
+        //Candidate::Education
+        Collection<Education> educations = getEducations(row.getCell(ExcelColumns.EDUCATION.asInt()));
+        candidate.getEducations().addAll(educations);
+        //Candidate::Occupation
+        Occupation occupation = getOccupation(getValueAsString(row.getCell(ExcelColumns.OCCUPATION_TITLE.asInt())), getValueAsString(row.getCell(ExcelColumns.OCCUPATION_SALARY.asInt())), getValueAsString(row.getCell(ExcelColumns.OCCUPATION_PLACE.asInt())));
+        candidate.getOccupations().add(occupation);
+        //Candidate::ExternalUserId
+        candidate.setExternalUserId(getValueAsString(row.getCell(ExcelColumns.EXTERNAL_USER_ID.asInt())));
+        //Candidate::Note
+        Collection<Note> notes = getNotes(new String[]{getValueAsString(row.getCell(ExcelColumns.NOTE_1.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_2.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_3.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_4.asInt()))});
+        candidate.getNotes().addAll(notes);
         return candidate;
     }
 
-    private static Long getHeightInCms(String heightInFeet){
-        if (heightInFeet == null  || heightInFeet.trim().isEmpty()) return null;
+    private static Collection<Note> getNotes(String[] notes) {
+        if (notes == null) return Collections.EMPTY_SET;
+        List<Note> noteList = Stream.of(notes)
+                .parallel()
+                .map(s -> {
+                    Note n = new Note();
+                    n.setNote(s);
+                    return n;
+                })
+                .collect(Collectors.toList());
+        return noteList;
+    }
 
-        try{
+    private static Occupation getOccupation(String title, String salary, String place) {
+        Occupation occupation = new Occupation();
+        occupation.setTitle(title != null ? title.trim() : title);
+        occupation.setCompanyLocation(place != null ? place.trim() : place);
+        if (salary != null) {
+            salary = salary.trim();
+            salary = salary.replaceAll(" ", "");
+            if (salary.indexOf("L") > 0 || salary.indexOf("l") > 0) {
+                salary = salary.replaceAll("[Ll]", "");
+                try {
+                    Double aDouble = Double.parseDouble(salary);
+                    occupation.setSalary(aDouble * 100000);
+                } catch (NumberFormatException nfe) {
+                }
+            }
+        }
+        return occupation;
+    }
+
+
+    private static Collection<Education> getEducations(Cell cell) {
+        if (null == cell) return Collections.EMPTY_SET;
+        Collection<Education> educations;
+        String value = getValueAsString(cell);
+        if (value != null && !value.isEmpty()) {
+            educations = new LinkedHashSet<>();
+            StringTokenizer tokenizer = new StringTokenizer(value, ",", false);
+            while (tokenizer.hasMoreTokens()) {
+                Education education = new Education();
+                education.setQualification(tokenizer.nextToken());
+                educations.add(education);
+            }
+        } else {
+            educations = Collections.EMPTY_SET;
+        }
+        return educations;
+    }
+
+    private static Collection<String> getPhoneNumbers(Cell[] cells) {
+        if (cells == null || cells.length == 0) return Collections.EMPTY_LIST;
+        Collection<String> phoneNumbers = Stream.of(cells)
+                .map(cell -> getValueAsString(cell))
+                .filter(s -> s != null && !s.isEmpty())
+                .map(s -> s.trim())
+                .filter(s -> s.matches("(\\d)+(-)?"))
+                .collect(Collectors.toSet());
+        return phoneNumbers;
+    }
+
+    private static Long getHeightInCms(String heightInFeet) {
+        if (heightInFeet == null || heightInFeet.trim().isEmpty()) return null;
+
+        try {
             Double h = Double.parseDouble(heightInFeet);
             h = h * 30;
             return h.longValue();
-        }catch(NumberFormatException nfe){
+        } catch (NumberFormatException nfe) {
             return null;
         }
 
@@ -175,18 +259,34 @@ public class ExcelDataImport {
         }
         final String fileName = args[0];
         try {
+            long startTime = System.currentTimeMillis();
             ExcelDataImport.importData(fileName);
+            long timeTaken = System.currentTimeMillis() - startTime;
+            logger.info("Completed in " + (timeTaken / 1000) + "s");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     enum ExcelColumns {
+        EXTERNAL_USER_ID(1),
         GENDER(2),
         NAME(3),
         SKINTONE(20),
         HEIGHT(21),
-        BLOODGROUP(22);
+        BLOODGROUP(22),
+        PHONE_1(23),
+        PHONE_2(24),
+        PHONE_3(25),
+        EDUCATION(16),
+        OCCUPATION_TITLE(19),
+        OCCUPATION_PLACE(17),
+        OCCUPATION_SALARY(18),
+        NOTE_1(28),
+        NOTE_2(29),
+        NOTE_3(30),
+        NOTE_4(31);
+
         private int columnIndex;
 
         ExcelColumns(int columnIndex) {
