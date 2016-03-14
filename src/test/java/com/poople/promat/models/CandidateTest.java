@@ -52,4 +52,9 @@ public class CandidateTest {
     public void testNotesMustBeEmpty(){
         Assert.assertEquals(0, candidate.getNotes().size());
     }
+
+    @Test
+    public void testDobMustBeNonNullUponCreationOfCandidate(){
+        Assert.assertNotNull(candidate.getDob());
+    }
 }

@@ -9,10 +9,16 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.util.SystemOutLogger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import sun.util.resources.cldr.aa.CalendarData_aa_ER;
 
+import javax.swing.text.DateFormatter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -128,7 +134,29 @@ public class ExcelDataImport {
         //Candidate::Note
         Collection<Note> notes = getNotes(new String[]{getValueAsString(row.getCell(ExcelColumns.NOTE_1.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_2.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_3.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_4.asInt()))});
         candidate.getNotes().addAll(notes);
+        //Candidate::DOB
+        Dob dob = getDOB(getValueAsDate(row.getCell(ExcelColumns.DATE_OF_BIRTH.asInt())), getValueAsString(row.getCell(ExcelColumns.TIME_OF_BIRTH.asInt())));
+        candidate.setDob(dob);
         return candidate;
+    }
+
+    private static Dob getDOB(Date birthdateAsDate, String birthtimeAsString) {
+        Dob dob = new Dob();
+        if (birthdateAsDate == null) return dob;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(birthdateAsDate);
+        LocalDate birthdate = LocalDate.of(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DATE));
+        dob.setBirthdate(birthdate);
+        birthtimeAsString = birthtimeAsString.replaceAll(" ", "").toUpperCase();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh.mma");
+        try {
+            LocalTime birthTime = LocalTime.parse(birthtimeAsString, formatter);
+            dob.setBirthtime(birthTime);
+        }catch(DateTimeParseException dtpe){
+
+        }
+
+        return dob;
     }
 
     private static Collection<Note> getNotes(String[] notes) {
@@ -206,6 +234,17 @@ public class ExcelDataImport {
 
     }
 
+    public static Date getValueAsDate(Cell cell){
+        if (cell == null) return null;
+        Date dateCellValue = null;
+        try {
+            dateCellValue = cell.getDateCellValue();
+        }catch(IllegalStateException ise){
+            dateCellValue = null;
+        }
+        return dateCellValue;
+    }
+
     private static String getValueAsString(Cell cell) {
         if (cell == null) return null;
         if (cell.getCellType() != Cell.CELL_TYPE_STRING) {
@@ -272,6 +311,8 @@ public class ExcelDataImport {
         EXTERNAL_USER_ID(1),
         GENDER(2),
         NAME(3),
+        DATE_OF_BIRTH(6),
+        TIME_OF_BIRTH(7),
         SKINTONE(20),
         HEIGHT(21),
         BLOODGROUP(22),

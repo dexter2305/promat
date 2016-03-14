@@ -26,12 +26,15 @@ public class Candidate {
 
     private Collection<Note> notes;
 
+    private Dob dob;
+
     public Candidate() {
         contact = new Contact();
         physique = new Physique();
         educations = new LinkedHashSet<>();
         occupations = new LinkedHashSet<>();
         notes = new LinkedHashSet<>();
+        dob  = new Dob();
     }
 
     public long getId() {
@@ -94,6 +97,18 @@ public class Candidate {
         return notes;
     }
 
+    public Dob getDob() {
+        return dob;
+    }
+
+    public void setDob(Dob dob) {
+        this.dob = dob;
+    }
+
+    public Integer age(){
+        return dob.age();
+    }
+
     public enum Gender {
         FEMALE, MALE;
 
@@ -133,11 +148,13 @@ public class Candidate {
         occupations.forEach(occupation -> contentBuilder.append(occupation.toString()));
         contentBuilder
                 .append("]")
-                .append("}")
+
                 .append("notes:[");
         notes.forEach(note -> contentBuilder.append(note.toString()));
         contentBuilder
-                .append("]");
+                .append("]")
+                .append(dob.toString())
+                .append("}");
         return contentBuilder.toString();
     }
 }
