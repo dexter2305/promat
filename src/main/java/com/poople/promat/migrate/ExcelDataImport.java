@@ -7,11 +7,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.util.SystemOutLogger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import sun.util.resources.cldr.aa.CalendarData_aa_ER;
 
-import javax.swing.text.DateFormatter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -41,7 +38,7 @@ public class ExcelDataImport {
         FileWriter csvWriter = new FileWriter(csvFileName);
         logger.info(fileName + " read completed.");
         logger.info("Number of sheets:" + workbook.getNumberOfSheets());
-        Collection<Candidate> candidates = new ArrayList<>();
+        Collection<Candidate> candidates = new LinkedList<>();
         int sheetCounter = 0;
         long beanCounter;
         Candidate candidate;
@@ -152,7 +149,7 @@ public class ExcelDataImport {
         try {
             LocalTime birthTime = LocalTime.parse(birthtimeAsString, formatter);
             dob.setBirthtime(birthTime);
-        }catch(DateTimeParseException dtpe){
+        } catch (DateTimeParseException dtpe) {
 
         }
 
@@ -234,12 +231,12 @@ public class ExcelDataImport {
 
     }
 
-    public static Date getValueAsDate(Cell cell){
+    public static Date getValueAsDate(Cell cell) {
         if (cell == null) return null;
         Date dateCellValue = null;
         try {
             dateCellValue = cell.getDateCellValue();
-        }catch(IllegalStateException ise){
+        } catch (IllegalStateException ise) {
             dateCellValue = null;
         }
         return dateCellValue;

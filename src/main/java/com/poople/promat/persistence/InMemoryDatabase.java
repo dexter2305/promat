@@ -1,7 +1,13 @@
 package com.poople.promat.persistence;
 
+import com.poople.promat.migrate.ExcelDataImport;
 import com.poople.promat.models.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
@@ -9,12 +15,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryDatabase {
 
+    private static final Log log = LogFactory.getFactory().getLog(InMemoryDatabase.class);
+
     public static final InMemoryDatabase INSTANCE = new InMemoryDatabase();
 
     private Map<Long, Candidate> store = new ConcurrentHashMap<>();
 
     private InMemoryDatabase() {
-        Collection<Candidate> testCandidates = getTestCandidates();
+        Collection<Candidate> testCandidates = getCandidateFromExcelSheet();
 
         for (Candidate c : testCandidates) {
             store.put(c.getId(), c);
@@ -43,6 +51,19 @@ public class InMemoryDatabase {
 
     public Collection<Candidate> readAll() {
         return store.values();
+    }
+
+    private Collection<Candidate> getCandidateFromExcelSheet() {
+        Collection<Candidate> candidates = new LinkedList<>();
+        try {
+            candidates.addAll(ExcelDataImport.importData("zLakshmi.xlsm"));
+            log.info("Using data from spreadsheet. Loaded " + candidates.size() + " records.");
+        } catch (IOException e) {
+            log.error("Error while reading from spreadsheet.", e);
+            log.info("Using mocked test candidates.");
+            candidates.addAll(getTestCandidates());
+        }
+        return candidates;
     }
 
     private Collection<Candidate> getTestCandidates() {
@@ -116,6 +137,9 @@ public class InMemoryDatabase {
         occupation.setYearOfLeavingCompany(2020);
         occupation.setCompanyLocation("Bangalore");
         rob.getOccupations().add(occupation);
+        Dob db = new Dob();
+        db.setBirthdate(LocalDate.now());
+        db.setBirthtime(LocalTime.now());
         return rob;
     }
 }

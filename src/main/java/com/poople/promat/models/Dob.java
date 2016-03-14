@@ -5,8 +5,8 @@ import java.time.LocalTime;
 import java.time.Period;
 
 public class Dob {
-    LocalDate birthdate;
-    LocalTime birthtime;
+    private LocalDate birthdate;
+    private LocalTime birthtime;
 
     public LocalDate getBirthdate() {
         return birthdate;
