@@ -1,6 +1,7 @@
 package com.poople.promat.resources;
 
 import com.poople.promat.models.Candidate;
+import com.poople.promat.models.Dob;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
@@ -12,6 +13,8 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collection;
 
 /**
@@ -55,6 +58,19 @@ public class CandidateResourceTest extends JerseyTest {
         newCandidate.setGender(Candidate.Gender.MALE);
         newCandidate.getContact().addEmailAddress("tyrion@got.com");
         newCandidate.getContact().addPhoneNumber("123-456-789");
+        Response response = target().path("candidates").request().post(Entity.entity(newCandidate, MediaType.APPLICATION_JSON_TYPE));
+        Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testAddNewCandidateWithDOB(){
+        Candidate newCandidate = new Candidate();
+        newCandidate.setName("Cersei Lannister");
+        newCandidate.setGender(Candidate.Gender.FEMALE);
+        Dob dob = new Dob();
+        dob.setBirthdate(LocalDate.now());
+        dob.setBirthtime(LocalTime.now());
+        newCandidate.setDob(dob);
         Response response = target().path("candidates").request().post(Entity.entity(newCandidate, MediaType.APPLICATION_JSON_TYPE));
         Assert.assertEquals(200, response.getStatus());
     }

@@ -22,8 +22,14 @@ public class InMemoryDatabase {
     private Map<Long, Candidate> store = new ConcurrentHashMap<>();
 
     private InMemoryDatabase() {
-        Collection<Candidate> testCandidates = getCandidateFromExcelSheet();
-
+        Collection<Candidate> testCandidates;
+        try {
+            testCandidates = getCandidateFromExcelSheet();
+        } catch (IOException e) {
+            log.error("Error while reading from spreadsheet." + e.getMessage());
+            log.info("Using mocked test candidates.");
+            testCandidates = getTestCandidates();
+        }
         for (Candidate c : testCandidates) {
             store.put(c.getId(), c);
         }
@@ -53,22 +59,15 @@ public class InMemoryDatabase {
         return store.values();
     }
 
-    private Collection<Candidate> getCandidateFromExcelSheet() {
+    private Collection<Candidate> getCandidateFromExcelSheet() throws IOException {
         Collection<Candidate> candidates = new LinkedList<>();
-        try {
-            candidates.addAll(ExcelDataImport.importData("zLakshmi.xlsm"));
-            log.info("Using data from spreadsheet. Loaded " + candidates.size() + " records.");
-        } catch (IOException e) {
-            log.error("Error while reading from spreadsheet.", e);
-            log.info("Using mocked test candidates.");
-            candidates.addAll(getTestCandidates());
-        }
+        candidates.addAll(ExcelDataImport.importData("zLakshmi.xlsm"));
+        log.info("Using data from spreadsheet. Loaded " + candidates.size() + " records.");
         return candidates;
     }
 
     private Collection<Candidate> getTestCandidates() {
         Collection<Candidate> candidates = new LinkedList<>();
-
 
         Candidate rob = getRobStark();
         Candidate yigrette = getYigrette();
@@ -137,7 +136,7 @@ public class InMemoryDatabase {
         occupation.setYearOfLeavingCompany(2020);
         occupation.setCompanyLocation("Bangalore");
         rob.getOccupations().add(occupation);
-        Dob db = new Dob();
+        Dob db = rob.getDob();
         db.setBirthdate(LocalDate.now());
         db.setBirthtime(LocalTime.now());
         return rob;

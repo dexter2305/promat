@@ -1,11 +1,19 @@
 package com.poople.promat.models;
 
+import com.poople.promat.adapters.LocalDateAdapter;
+import com.poople.promat.adapters.LocalTimeAdapter;
+
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Period;
 
 public class Dob {
+
+    @XmlJavaTypeAdapter(LocalDateAdapter.class)
     private LocalDate birthdate;
+
+    @XmlJavaTypeAdapter(LocalTimeAdapter.class)
     private LocalTime birthtime;
 
     public LocalDate getBirthdate() {
@@ -24,7 +32,7 @@ public class Dob {
         this.birthtime = birthtime;
     }
 
-    public Integer age(){
+    public Integer age() {
         if (birthdate == null) return null;
         Period period = Period.between(birthdate, LocalDate.now());
         return period.getYears() > 0 ? period.getYears() : null;

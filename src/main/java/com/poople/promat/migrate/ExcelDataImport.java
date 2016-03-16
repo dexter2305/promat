@@ -1,5 +1,6 @@
 package com.poople.promat.migrate;
 
+import com.poople.promat.adapters.DTFormatter;
 import com.poople.promat.models.*;
 import com.poople.promat.persistence.IDGenerator;
 import org.apache.commons.logging.Log;
@@ -12,10 +13,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,6 +28,7 @@ public class ExcelDataImport {
     }
 
     public static Collection<Candidate> importData(String fileName) throws IOException {
+        final Collection<Candidate> candidates = new LinkedList<>();
         Set<Report> reports = new LinkedHashSet<>();
         FileInputStream fileInputStream = new FileInputStream(fileName);
         XSSFWorkbook workbook = new XSSFWorkbook(fileInputStream);
@@ -38,7 +36,7 @@ public class ExcelDataImport {
         FileWriter csvWriter = new FileWriter(csvFileName);
         logger.info(fileName + " read completed.");
         logger.info("Number of sheets:" + workbook.getNumberOfSheets());
-        Collection<Candidate> candidates = new LinkedList<>();
+
         int sheetCounter = 0;
         long beanCounter;
         Candidate candidate;
@@ -132,27 +130,15 @@ public class ExcelDataImport {
         Collection<Note> notes = getNotes(new String[]{getValueAsString(row.getCell(ExcelColumns.NOTE_1.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_2.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_3.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_4.asInt()))});
         candidate.getNotes().addAll(notes);
         //Candidate::DOB
-        Dob dob = getDOB(getValueAsDate(row.getCell(ExcelColumns.DATE_OF_BIRTH.asInt())), getValueAsString(row.getCell(ExcelColumns.TIME_OF_BIRTH.asInt())));
+        Dob dob = getDOB(getDateValueAsString(row.getCell(ExcelColumns.DATE_OF_BIRTH.asInt())), getValueAsString(row.getCell(ExcelColumns.TIME_OF_BIRTH.asInt())));
         candidate.setDob(dob);
         return candidate;
     }
 
-    private static Dob getDOB(Date birthdateAsDate, String birthtimeAsString) {
+    private static Dob getDOB(String birthdateAsString, String birthtimeAsString) {
         Dob dob = new Dob();
-        if (birthdateAsDate == null) return dob;
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(birthdateAsDate);
-        LocalDate birthdate = LocalDate.of(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DATE));
-        dob.setBirthdate(birthdate);
-        birthtimeAsString = birthtimeAsString.replaceAll(" ", "").toUpperCase();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh.mma");
-        try {
-            LocalTime birthTime = LocalTime.parse(birthtimeAsString, formatter);
-            dob.setBirthtime(birthTime);
-        } catch (DateTimeParseException dtpe) {
-
-        }
-
+        dob.setBirthdate(DTFormatter.INSTANCE.getLocalDateFrom(birthdateAsString));
+        dob.setBirthtime(DTFormatter.INSTANCE.getLocalTimeFrom(birthtimeAsString));
         return dob;
     }
 
@@ -231,15 +217,15 @@ public class ExcelDataImport {
 
     }
 
-    public static Date getValueAsDate(Cell cell) {
+    public static String getDateValueAsString(Cell cell) {
         if (cell == null) return null;
-        Date dateCellValue = null;
+        String dateValueAsString;
         try {
-            dateCellValue = cell.getDateCellValue();
+            dateValueAsString = cell.toString();
         } catch (IllegalStateException ise) {
-            dateCellValue = null;
+            dateValueAsString = null;
         }
-        return dateCellValue;
+        return dateValueAsString;
     }
 
     private static String getValueAsString(Cell cell) {
