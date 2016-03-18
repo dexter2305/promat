@@ -7,13 +7,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.net.URI;
 import java.util.Collection;
 
 
 @Path("candidates")
 public class CandidateResource {
+
+
+    @Context
+    private UriInfo uriInfo;
 
     private InMemoryDatabase db = InMemoryDatabase.INSTANCE;
     private static final Log logger = LogFactory.getLog(CandidateResource.class);
@@ -55,8 +62,8 @@ public class CandidateResource {
         logger.info("create: " + candidate);
         Response response;
         db.create(candidate);
-        response = Response.ok().build();
-        logger.info("create: " + candidate + " returned " + response.getStatus());
+        response = Response.created(URI.create(uriInfo.getAbsolutePath() + "/" + candidate.getId())).build();
+        logger.info("create: " + candidate + " returned " + response.getStatus() + " -> " + response.getLocation().getPath());
         return response;
     }
 
