@@ -2,6 +2,7 @@ package com.poople.promat.persistence;
 
 import com.poople.promat.migrate.ExcelDataImport;
 import com.poople.promat.models.*;
+import com.poople.promat.resources.Filter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -13,7 +14,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class InMemoryDatabase {
+public class InMemoryDatabase implements IStore {
 
     private static final Log log = LogFactory.getFactory().getLog(InMemoryDatabase.class);
 
@@ -37,25 +38,35 @@ public class InMemoryDatabase {
 
     }
 
+    @Override
     public void create(Candidate person) {
         long id = IDGenerator.INSTANCE.getUUID();
         person.setId(id);
         store.put(person.getId(), person);
     }
 
+    @Override
     public Candidate read(long id) {
         return store.get(id);
     }
 
+    @Override
     public void update(Candidate person) {
         store.put(person.getId(), person);
     }
 
+    @Override
     public void delete(long id) {
         store.remove(id);
     }
 
+    @Override
     public Collection<Candidate> readAll() {
+        return store.values();
+    }
+
+    @Override
+    public Collection<Candidate> apply(Filter filter) {
         return store.values();
     }
 

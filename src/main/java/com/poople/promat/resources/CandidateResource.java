@@ -2,6 +2,7 @@ package com.poople.promat.resources;
 
 
 import com.poople.promat.models.Candidate;
+import com.poople.promat.persistence.IStore;
 import com.poople.promat.persistence.InMemoryDatabase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,6 +14,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.util.Collection;
+import java.util.Collections;
 
 
 @Path("candidates")
@@ -22,7 +24,7 @@ public class CandidateResource {
     @Context
     private UriInfo uriInfo;
 
-    private InMemoryDatabase db = InMemoryDatabase.INSTANCE;
+    private IStore db = InMemoryDatabase.INSTANCE;
     private static final Log logger = LogFactory.getLog(CandidateResource.class);
 
     @GET
@@ -65,6 +67,15 @@ public class CandidateResource {
         response = Response.created(URI.create(uriInfo.getAbsolutePath() + "/" + candidate.getId())).build();
         logger.info("create: " + candidate + " returned " + response.getStatus() + " -> " + response.getLocation().getPath());
         return response;
+    }
+
+    @POST
+    @Path("/filter")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Collection<Candidate> apply(Filter filter){
+        logger.debug("filter processing can happen here.... ");
+        return db.apply(filter);
     }
 
     @DELETE
