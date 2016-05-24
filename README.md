@@ -23,4 +23,7 @@ Commands to pull from an existing remote repository
 > git pull origin master
 	-- this pulls any new changes in the remote repository to local
 
+Command to run the ExcelReader (as a maven project)
+> mvn compile exec:java -Dexec.mainClass=com.poople.promat.migrate.ExcelDataImport -Dexec.args=<path_to_excel_file> -Dexec.classpathScope=runtime
+
 
