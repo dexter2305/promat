@@ -21,6 +21,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -60,7 +61,7 @@ public class ExcelDataImport {
         for (Sheet sheet : workbook) {
             Report report = new Report();
             beanCounter = 0;
-            logger.info("Reading sheet # " + (sheetCounter + 1) + " with row count = " + sheet.getLastRowNum());
+            logger.info("Reading sheet # " + (sheetCounter + 1) + " with row count = " + sheet.getLastRowNum() + 1);
             for (Row row : sheet) {
                 //skip the header row
                 if (row.getRowNum() == 0) continue;
@@ -69,14 +70,14 @@ public class ExcelDataImport {
 					if (candidate != null) {
 	                    candidates.add(candidate);
 	                    beanCounter++;
-	                    logger.info((sheetCounter + 1) + "->" + (row.getRowNum()) + " -> " + candidate.toString());
+	                    logger.info((sheetCounter + 1) + "->" + (row.getRowNum() + 1 ) + " -> " + candidate.toString());
 	                } else {
 	                    writeAsCSV(csvWriter, row, "Unknown error while reading row. Please check log file.");
-	                    logger.error((sheetCounter + 1) + "->" + (row.getRowNum()) + " -> Unknown error while reading row. Please check log file.");
+	                    logger.error((sheetCounter + 1) + "->" + (row.getRowNum() + 1) + " -> Unknown error while reading row. Please check log file.");
 	                }
 				} catch (DataError e) {
 					writeAsCSV(csvWriter, row, "Error while reading row : "+ e.getMessage());
-                    logger.error((sheetCounter + 1) + "->" + (row.getRowNum()) + " -> Error while reading row : "+ e.getMessage());
+                    logger.error((sheetCounter + 1) + "->" + (row.getRowNum() + 1) + " -> Error while reading row : "+ e.getMessage());
 				}
                 
             }
@@ -118,7 +119,7 @@ public class ExcelDataImport {
             writer.write("\n");
             writer.flush();
         } catch (IOException e) {
-            logger.error("Exception while writing " + row.getRowNum() + " to error file. ", e);
+            logger.error("Exception while writing " + (row.getRowNum() + 1) + " to error file. ", e);
         }
     }
 
@@ -187,10 +188,12 @@ public class ExcelDataImport {
     }
 
     private static Dob getDOB(String birthdateAsString, String birthtimeAsString) throws DataError {
+    	logger.debug("ENTER - getDOB() :"+ birthdateAsString + ", " + birthtimeAsString);
         Dob dob = new Dob();
         dob.setBirthdate(DTFormatter.INSTANCE.getLocalDateFrom(birthdateAsString));
         dob.setBirthtime(DTFormatter.INSTANCE.getLocalTimeFrom(birthtimeAsString));
-        return dob;
+        logger.debug("EXIT - getDOB() :"+ dob.toString());
+        return dob;        
     }
 
     private static Collection<Note> getNotes(String[] notes) {
@@ -260,6 +263,8 @@ public class ExcelDataImport {
         if (heightInFeet == null || heightInFeet.trim().isEmpty()) return null;
         try {
         	heightInFeet = heightInFeet.replaceAll("'", "");
+        	heightInFeet = heightInFeet.replaceAll("\"", "");
+        	heightInFeet = heightInFeet.replaceAll("”", "");
             Double h = Double.parseDouble(heightInFeet);
             h = h * 30;
             logger.debug("EXIT - getHeightInCms() :"+ h.longValue());
@@ -270,14 +275,30 @@ public class ExcelDataImport {
         }        
     }
 
-    public static String getDateValueAsString(Cell cell) {
-    	logger.debug("ENTER - getDateValueAsString");
+    public static String getDateValueAsString(Cell cell) throws DataError {
+    	logger.debug("ENTER - getDateValueAsString : ," + cell);
         if (cell == null) return null;
         String dateValueAsString;
         try {
-            dateValueAsString = DTFormatter.INSTANCE.getLocalDateFrom(cell.getDateCellValue()).format(DTFormatter.INSTANCE.getDateFormatter());
+
+        	if(cell.getCellType() == Cell.CELL_TYPE_NUMERIC && cell.getDateCellValue() != null) 
+        	{
+	        	LocalDate dateValueAsLocalDate = DTFormatter.INSTANCE.getLocalDateFrom(cell.getDateCellValue());
+	        	logger.debug("dateValueAsLocalDate : " + dateValueAsLocalDate);
+	            dateValueAsString = dateValueAsLocalDate.format(DTFormatter.INSTANCE.getDateFormatter());
+        	}else {
+        		//FIXME this may be needed until we use excel for profile matching 
+        		String tempStr = cell.getStringCellValue(); 
+        		if(tempStr == null || tempStr.trim().isEmpty() || tempStr.contains("*")) 
+        		{
+	            	dateValueAsString = null;
+	            }else {
+		            dateValueAsString = tempStr;
+	        	}
+        	}
         } catch (IllegalStateException ise) {
             dateValueAsString = null;
+            throw new DataError("Invalid DOB :"+ ise.toString());
         }
         logger.debug("EXIT - getDateValueAsString : " + dateValueAsString);
         return dateValueAsString;
@@ -291,7 +312,7 @@ public class ExcelDataImport {
         }
         String stringCellValue = cell.getStringCellValue();
         //FIXME this may be needed until we use excel for profile matching 
-        if(stringCellValue.contains("*")) {
+        if(stringCellValue.contains("*") || stringCellValue.trim().isEmpty()) {
         	stringCellValue = null;
         }
         logger.debug("EXIT - getValueAsString : " + stringCellValue);
@@ -322,10 +343,10 @@ public class ExcelDataImport {
 		return paadham;
     }
     private static void validateMandatoryFields(Row row) throws DataError {
-        Request nameRequest = new Request(row.getCell(ExcelColumns.NAME.asInt()), ExcelColumns.NAME);
-        Request genderRequest = new Request(row.getCell(ExcelColumns.GENDER.asInt()), ExcelColumns.GENDER);
+        //Request nameRequest = new Request(row.getCell(ExcelColumns.NAME.asInt()), ExcelColumns.NAME);
+        //Request genderRequest = new Request(row.getCell(ExcelColumns.GENDER.asInt()), ExcelColumns.GENDER);
         Request idRequest = new Request(row.getCell(ExcelColumns.USER_ID.asInt()), ExcelColumns.USER_ID);
-        List<Request> mandatoryFields = Arrays.asList(new Request[]{idRequest, nameRequest, genderRequest});
+        List<Request> mandatoryFields = Arrays.asList(new Request[]{idRequest});
         List<Response> responseList = mandatoryFields.stream().map(request -> isCellValid(request)).collect(Collectors.toList());
         Optional<Response> any = responseList.parallelStream().filter(response -> response.isValid == false).findAny();
         if (any.isPresent()) {

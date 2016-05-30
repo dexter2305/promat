@@ -13,7 +13,7 @@ public interface HoroscopeConstants {
         PUNARPOOSAM_123("PUNARPOOSAM"),
         PUNARPOOSAM_4("PUNARPOOSAM"),
         POOSAM("POOSAM"),
-        AYILIYAM("AYILIYAM"),
+        AYILYAM("AYILYAM"),
         MAGAM("MAGAM"),
         POORAM("POORAM"),
         UTHRAM_1("UTHRAM"),

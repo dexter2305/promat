@@ -92,10 +92,20 @@ public class Physique {
         ONEGATIVE("O-"),
         APOSITIVE("A+"),
         ANEGATIVE("A-"),
+        A1POSITIVE("A1+"),
+        A1NEGATIVE("A1-"),
+        A2POSITIVE("A2+"),
+        A2NEGATIVE("A2-"),
         BPOSITIVE("B+"),
+        B1POSITIVE("B1+"),
         BNEGATIVE("B-"),
         ABPOSITIVE("AB+"),
-        ABNEGATIVE("AB-");
+        ABNEGATIVE("AB-"),
+        A1BPOSITIVE("A1B+"),
+        A1BNEGATIVE("A1B-"),
+        A2BPOSITIVE("A2B+"),
+        A2BNEGATIVE("A2B-");
+    	
         private String bloodGroup;
 
         Bloodgroup(String bloodGroup) {
@@ -108,8 +118,7 @@ public class Physique {
 
         @Override
         public String toString() {
-            String s = super.toString();
-            return s.substring(0, 1) + s.substring(1).toLowerCase();
+        	return this.bloodGroup;
         }
 
         public static Bloodgroup fromString(String valueAsString) throws DataError {
@@ -128,7 +137,9 @@ public class Physique {
                         break;
                     }
                 }
-                throw new DataError("Invalid Bloodgroup :"+ valueAsString);
+                if (bloodGroup== null) {
+                	throw new DataError("Invalid Bloodgroup :"+ valueAsString);
+                }
             }
             logger.debug("EXIT - Bloodgroup.fromString() :"+ bloodGroup);
             return bloodGroup;
