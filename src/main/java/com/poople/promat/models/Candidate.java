@@ -183,7 +183,7 @@ public class Candidate {
                 .append("gender:").append("'").append(gender).append("'").append(",")
                 .append("maritalStatus:").append("'").append(maritalStatus).append("'").append(",")
                 .append("kulam:").append("'").append(kulam).append("'").append(",")
-                .append(horoscope.toString())
+                .append("kulam:").append("'").append(horoscope).append("'").append(",")
                 .append(physique.toString()).append(",")
                 .append(contact.toString())
                 .append("education:[");
