@@ -8,10 +8,15 @@ import com.poople.promat.models.HoroscopeConstants.Star;
 import com.poople.promat.persistence.IDGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -35,7 +40,15 @@ public class ExcelDataImport {
         final Collection<Candidate> candidates = new LinkedList<>();
         Set<Report> reports = new LinkedHashSet<>();
         FileInputStream fileInputStream = new FileInputStream(fileName);
-        XSSFWorkbook workbook = new XSSFWorkbook(fileInputStream);
+        //Use generix workbook class so we can read any excel format like .xls too
+        Workbook workbook;
+		try {
+			workbook = WorkbookFactory.create(fileInputStream);
+		} catch (EncryptedDocumentException | InvalidFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IOException(e.getMessage());
+		}
         final String csvFileName = fileName.substring(0, fileName.indexOf(".")) + ".csv";
         FileWriter csvWriter = new FileWriter(csvFileName);
         logger.info(fileName + " read completed.");
@@ -43,23 +56,29 @@ public class ExcelDataImport {
 
         int sheetCounter = 0;
         long beanCounter;
-        Candidate candidate;
+        Candidate candidate = null;
         for (Sheet sheet : workbook) {
             Report report = new Report();
             beanCounter = 0;
-            logger.debug("Reading sheet # " + (sheetCounter + 1) + " with row count = " + sheet.getLastRowNum());
+            logger.info("Reading sheet # " + (sheetCounter + 1) + " with row count = " + sheet.getLastRowNum());
             for (Row row : sheet) {
                 //skip the header row
                 if (row.getRowNum() == 0) continue;
-                candidate = getCandidateBean(row);
-                if (candidate != null) {
-                    candidates.add(candidate);
-                    beanCounter++;
-                    logger.debug((sheetCounter) + "->" + (row.getRowNum()) + " -> " + candidate.toString());
-                } else {
-                    writeAsCSV(csvWriter, row);
-                    logger.error("Error while reading row @ " + (sheetCounter + 1) + "/" + (row.getRowNum()));
-                }
+                try {
+					candidate = getCandidateBean(row);
+					if (candidate != null) {
+	                    candidates.add(candidate);
+	                    beanCounter++;
+	                    logger.info((sheetCounter + 1) + "->" + (row.getRowNum()) + " -> " + candidate.toString());
+	                } else {
+	                    writeAsCSV(csvWriter, row, "Unknown error while reading row. Please check log file.");
+	                    logger.error((sheetCounter + 1) + "->" + (row.getRowNum()) + " -> Unknown error while reading row. Please check log file.");
+	                }
+				} catch (DataError e) {
+					writeAsCSV(csvWriter, row, "Error while reading row : "+ e.getMessage());
+                    logger.error((sheetCounter + 1) + "->" + (row.getRowNum()) + " -> Error while reading row : "+ e.getMessage());
+				}
+                
             }
             report.sheetNumber = sheetCounter + 1;
             report.numberOfRowsRead = sheet.getLastRowNum();
@@ -83,10 +102,11 @@ public class ExcelDataImport {
         return candidates;
     }
 
-    private static void writeAsCSV(FileWriter writer, Row row) {
+    private static void writeAsCSV(FileWriter writer, Row row, String errorMsg) {
         Iterator<Cell> cellIterator = row.cellIterator();
         final StringBuilder rowBuilder = new StringBuilder();
         rowBuilder.append(row.getSheet().getSheetName() + " - row :" + (row.getRowNum() + 1)).append("->").append("|");
+        rowBuilder.append(errorMsg).append("|");
         while (cellIterator.hasNext()) {
             Cell cell = cellIterator.next();
             String cellValue = getValueAsString(cell);
@@ -102,29 +122,20 @@ public class ExcelDataImport {
         }
     }
 
-    private static Candidate getCandidateBean(Row row) {
+    private static Candidate getCandidateBean(Row row) throws DataError {
         if (row == null) return null;
-        if (!areMandatoryFieldsPresent(row)) return null;
+        validateMandatoryFields(row);
         Candidate candidate = new Candidate();
+    
         //Candidate::Id
         //candidate.setId(IDGenerator.INSTANCE.getUUID());
         //need to fetch the id from excel itself
         //mandatory field
-        String usrId = getValueAsString(row.getCell(ExcelColumns.USER_ID.asInt()));
-        long id = 0L;
-        if ( usrId != null) {
-	        try {
-	        	id = Long.parseLong(usrId);
-	        }catch(NumberFormatException nfe) {
-	        	return null;
-	        }
-        } else {
-        	return null;
-        }
+        long id = getValueAsLong(row.getCell(ExcelColumns.USER_ID.asInt()));
         candidate.setId(id);
         //Candidate::Name;
         candidate.setName(getValueAsString(row.getCell(ExcelColumns.NAME.asInt())));
-        
+
         //Candidate::DOB
         Dob dob = getDOB(getDateValueAsString(row.getCell(ExcelColumns.DATE_OF_BIRTH.asInt())), getValueAsString(row.getCell(ExcelColumns.TIME_OF_BIRTH.asInt())));
         candidate.setDob(dob);
@@ -132,10 +143,13 @@ public class ExcelDataImport {
         //Candidate::Marital Staus
         candidate.setMaritalStatus(getValueAsString(row.getCell(ExcelColumns.MARITAL_STATUS.asInt())));
         
+        //Candidate:kulam
+        candidate.setKulam(getValueAsString(row.getCell(ExcelColumns.KULAM.asInt())));
+        
         //Candidate::Horoscope
     	Star star = HoroscopeConstants.Star.fromString(getValueAsString(row.getCell(ExcelColumns.STAR.asInt())));
         String birthPlace = getValueAsString(row.getCell(ExcelColumns.NATIVE.asInt()));
-        int paadham = getPaadham(row.getCell(ExcelColumns.IRUPPU.asInt()));
+        int paadham = getPaadham(row.getCell(ExcelColumns.PADHAM.asInt()));
 		Raasi raasi = HoroscopeConstants.Raasi.fromString(getValueAsString(row.getCell(ExcelColumns.RASI.asInt())));
 		Raasi lagnam = HoroscopeConstants.Raasi.fromString(getValueAsString(row.getCell(ExcelColumns.LAGNAM.asInt())));
 		String raahu_kethu = getValueAsString(row.getCell(ExcelColumns.RAAHU_KETHU.asInt()));
@@ -168,11 +182,11 @@ public class ExcelDataImport {
         //Candidate::Note
         Collection<Note> notes = getNotes(new String[]{getValueAsString(row.getCell(ExcelColumns.NOTE_1.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_2.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_3.asInt()))});
         candidate.getNotes().addAll(notes);
-
+    
         return candidate;
     }
 
-    private static Dob getDOB(String birthdateAsString, String birthtimeAsString) {
+    private static Dob getDOB(String birthdateAsString, String birthtimeAsString) throws DataError {
         Dob dob = new Dob();
         dob.setBirthdate(DTFormatter.INSTANCE.getLocalDateFrom(birthdateAsString));
         dob.setBirthtime(DTFormatter.INSTANCE.getLocalTimeFrom(birthtimeAsString));
@@ -242,30 +256,35 @@ public class ExcelDataImport {
     }
 
     private static Long getHeightInCms(String heightInFeet) {
+    	logger.debug("ENTER - getHeightInCms() :"+ heightInFeet);
         if (heightInFeet == null || heightInFeet.trim().isEmpty()) return null;
-
         try {
+        	heightInFeet = heightInFeet.replaceAll("'", "");
             Double h = Double.parseDouble(heightInFeet);
             h = h * 30;
+            logger.debug("EXIT - getHeightInCms() :"+ h.longValue());
             return h.longValue();
         } catch (NumberFormatException nfe) {
+        	nfe.printStackTrace();
             return null;
-        }
-
+        }        
     }
 
     public static String getDateValueAsString(Cell cell) {
+    	logger.debug("ENTER - getDateValueAsString");
         if (cell == null) return null;
         String dateValueAsString;
         try {
-            dateValueAsString = cell.toString();
+            dateValueAsString = DTFormatter.INSTANCE.getLocalDateFrom(cell.getDateCellValue()).format(DTFormatter.INSTANCE.getDateFormatter());
         } catch (IllegalStateException ise) {
             dateValueAsString = null;
         }
+        logger.debug("EXIT - getDateValueAsString : " + dateValueAsString);
         return dateValueAsString;
     }
 
     private static String getValueAsString(Cell cell) {
+    	logger.debug("ENTER - getValueAsString");
         if (cell == null) return null;
         if (cell.getCellType() != Cell.CELL_TYPE_STRING) {
             cell.setCellType(Cell.CELL_TYPE_STRING);
@@ -275,6 +294,7 @@ public class ExcelDataImport {
         if(stringCellValue.contains("*")) {
         	stringCellValue = null;
         }
+        logger.debug("EXIT - getValueAsString : " + stringCellValue);
         return stringCellValue;
     }
 
@@ -286,6 +306,7 @@ public class ExcelDataImport {
 	        	id = Long.parseLong(value);
 	        	return id;
 	        }catch(NumberFormatException nfe) {
+	        	//nfe.printStackTrace();
 	        	return null;
 	        }
         }
@@ -300,7 +321,7 @@ public class ExcelDataImport {
 		}
 		return paadham;
     }
-    private static boolean areMandatoryFieldsPresent(Row row) {
+    private static void validateMandatoryFields(Row row) throws DataError {
         Request nameRequest = new Request(row.getCell(ExcelColumns.NAME.asInt()), ExcelColumns.NAME);
         Request genderRequest = new Request(row.getCell(ExcelColumns.GENDER.asInt()), ExcelColumns.GENDER);
         Request idRequest = new Request(row.getCell(ExcelColumns.USER_ID.asInt()), ExcelColumns.USER_ID);
@@ -313,11 +334,8 @@ public class ExcelDataImport {
             responseList.stream().filter(response -> response.isValid == false).forEach(response -> {
                 messagebuilder.append("<" + response.getFieldType() + ">").append(" ");
             });
-            logger.error(messagebuilder.toString());
-            return false;
-        } else {
-            return true;
-        }
+            throw new DataError("Invalid Mandatory Fields :"+ messagebuilder.toString());
+        } 
     }
 
 
@@ -353,6 +371,7 @@ public class ExcelDataImport {
         }
         final String fileName = args[0];
         try {
+        	Logger.getRootLogger().setLevel(Level.INFO);
             long startTime = System.currentTimeMillis();
             ExcelDataImport.importData(fileName);
             long timeTaken = System.currentTimeMillis() - startTime;

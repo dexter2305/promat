@@ -49,7 +49,7 @@ public class Dob {
         return sb.toString();
     }
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws DataError {
         Dob dob = new Dob();
         dob.setBirthdate(DTFormatter.INSTANCE.getLocalDateFrom("30/03/1981"));
         dob.setBirthtime(DTFormatter.INSTANCE.getLocalTimeFrom("09:16:08 pm"));

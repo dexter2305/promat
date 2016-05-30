@@ -34,6 +34,8 @@ public class Candidate {
     //TODO not clear about this field as of now..
     private String late;
 
+    private String kulam;
+    
     //Note: Need DOB in side horoscope as horoscope is generated using DOB
     private Horoscope horoscope;
     
@@ -134,6 +136,14 @@ public class Candidate {
 		this.late = late;
 	}
 
+	public String getKulam() {
+		return kulam;
+	}
+
+	public void setKulam(String kulam) {
+		this.kulam = kulam;
+	}
+
 	public Horoscope getHoroscope() {
 		return horoscope;
 	}
@@ -171,6 +181,9 @@ public class Candidate {
                 .append("xId:").append("'").append(externalUserId).append("'").append(",")
                 .append("name:").append("'").append(name).append("'").append(",")
                 .append("gender:").append("'").append(gender).append("'").append(",")
+                .append("maritalStatus:").append("'").append(maritalStatus).append("'").append(",")
+                .append("kulam:").append("'").append(kulam).append("'").append(",")
+                .append(horoscope.toString())
                 .append(physique.toString()).append(",")
                 .append(contact.toString())
                 .append("education:[");
@@ -191,3 +204,4 @@ public class Candidate {
         return contentBuilder.toString();
     }
 }
+

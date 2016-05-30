@@ -19,7 +19,6 @@ public class Horoscope {
     private String sevvai;
     private Planet dasa;
     private String iruppu;
-    private Image uploadedHoroscopeImage;
     public Horoscope(Dob dateOfBirth, String birthPlace) {
         super();
         this.dateOfBirth = dateOfBirth;
@@ -101,12 +100,24 @@ public class Horoscope {
 	public void setIruppu(String iruppu) {
 		this.iruppu = iruppu;
 	}
-	public Image getUploadedHoroscopeImage() {
-		return uploadedHoroscopeImage;
-	}
-	public void setUploadedHoroscopeImage(Image uploadedHoroscopeImage) {
-		this.uploadedHoroscopeImage = uploadedHoroscopeImage;
-	}
     
+	@Override
+	public String toString() {
+		StringBuilder contentBuilder = new StringBuilder();
+        contentBuilder
+                .append("Horoscope:{")
+                .append("birthPlace:").append("'").append(birthPlace).append("'").append(",")
+                .append("star:").append("'").append(star).append("'").append(",")
+                .append("paadham:").append("'").append(paadham).append("'").append(",")
+                .append("raasi:").append("'").append(raasi).append("'").append(",")
+                .append("star:").append("'").append(star).append("'").append(",")
+                .append("lagnam:").append("'").append(lagnam).append("'").append(",")
+                .append("raahu_kethu:").append("'").append(raahu_kethu).append("'").append(",")
+                .append("sevvai:").append("'").append(sevvai).append("'").append(",")
+                .append("dasa:").append("'").append(dasa).append("'").append(",")
+                .append("iruppu:").append("'").append(iruppu).append("'").append(",")
+                .append("}");
+        return contentBuilder.toString();
+	}
     
 }
