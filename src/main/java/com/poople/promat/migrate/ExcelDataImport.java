@@ -5,18 +5,11 @@ import com.poople.promat.models.*;
 import com.poople.promat.models.HoroscopeConstants.Planet;
 import com.poople.promat.models.HoroscopeConstants.Raasi;
 import com.poople.promat.models.HoroscopeConstants.Star;
-import com.poople.promat.persistence.IDGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -29,6 +22,10 @@ import java.util.stream.Stream;
 public class ExcelDataImport {
 
     private static final Log logger = LogFactory.getLog(ExcelDataImport.class);
+
+    public static Collection<Candidate> importData(String fileName) throws IOException {
+        return importData(fileName, null);
+    }
 
     private static class Report {
         private int sheetNumber;
@@ -405,7 +402,6 @@ public class ExcelDataImport {
         	sheetsToRead = Arrays.asList(args[1]);
     	}
         try {
-        	Logger.getRootLogger().setLevel(Level.INFO);
             long startTime = System.currentTimeMillis();
             ExcelDataImport.importData(fileName, sheetsToRead);
             long timeTaken = System.currentTimeMillis() - startTime;
