@@ -105,7 +105,7 @@ public class Horoscope {
 	public String toString() {
 		StringBuilder contentBuilder = new StringBuilder();
         contentBuilder
-                .append("Horoscope:{")
+                .append("{")
                 .append("birthPlace:").append("'").append(birthPlace).append("'").append(",")
                 .append("star:").append("'").append(star).append("'").append(",")
                 .append("paadham:").append("'").append(paadham).append("'").append(",")
