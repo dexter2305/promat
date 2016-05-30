@@ -28,6 +28,15 @@ public class Candidate {
 
     private Dob dob;
 
+    //private MaritalStatus maritalStatus; // not using as of as the data is not consistent
+    private String maritalStatus;
+    
+    //TODO not clear about this field as of now..
+    private String late;
+
+    //Note: Need DOB in side horoscope as horoscope is generated using DOB
+    private Horoscope horoscope;
+    
     public Candidate() {
         contact = new Contact();
         physique = new Physique();
@@ -109,7 +118,31 @@ public class Candidate {
         return dob.age();
     }
 
-    public enum Gender {
+    public String getMaritalStatus() {
+		return maritalStatus;
+	}
+
+	public void setMaritalStatus(String maritalStatus) {
+		this.maritalStatus = maritalStatus;
+	}
+
+	public String getLate() {
+		return late;
+	}
+
+	public void setLate(String late) {
+		this.late = late;
+	}
+
+	public Horoscope getHoroscope() {
+		return horoscope;
+	}
+
+	public void setHoroscope(Horoscope horoscope) {
+		this.horoscope = horoscope;
+	}
+
+	public enum Gender {
         FEMALE, MALE;
 
         public static Gender fromString(String s) {

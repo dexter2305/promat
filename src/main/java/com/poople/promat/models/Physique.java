@@ -66,8 +66,8 @@ public class Physique {
             try {
                 tone = SkinTone.valueOf(s);
             } catch (IllegalArgumentException ie) {
-                if (s.equalsIgnoreCase("ok")) tone = SkinTone.MODERATE;
-                else if (s.equalsIgnoreCase("fair")) tone = SkinTone.FAIR;
+                if (s.equalsIgnoreCase("ok") || s.toLowerCase().contains("ok") || s.toLowerCase().contains("wheatish")) tone = SkinTone.MODERATE;
+                else if (s.equalsIgnoreCase("fair")  || s.toLowerCase().contains("fair")) tone = SkinTone.FAIR;
                 else if (s.equalsIgnoreCase("dark")) tone = SkinTone.DARK;
                 else tone = null;
             }

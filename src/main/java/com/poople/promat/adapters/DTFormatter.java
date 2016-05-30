@@ -11,9 +11,9 @@ public enum DTFormatter {
 
     INSTANCE;
 
-    private static final String PATTERN_TIME = "hh.mma";
+    private static final String PATTERN_TIME = "h:m[:s]a";
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(PATTERN_TIME);
-    private static final String PATTERN_DATE = "dd-MMM-yyyy";
+    private static final String PATTERN_DATE = "d/M/y";
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(PATTERN_DATE);
 
     public DateTimeFormatter getTimeFormatter(){

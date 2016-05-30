@@ -2,6 +2,9 @@ package com.poople.promat.migrate;
 
 import com.poople.promat.adapters.DTFormatter;
 import com.poople.promat.models.*;
+import com.poople.promat.models.HoroscopeConstants.Planet;
+import com.poople.promat.models.HoroscopeConstants.Raasi;
+import com.poople.promat.models.HoroscopeConstants.Star;
 import com.poople.promat.persistence.IDGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +29,7 @@ public class ExcelDataImport {
         private long numberOfRowsRead;
         private long numberOfBeansLoaded;
     }
+
 
     public static Collection<Candidate> importData(String fileName) throws IOException {
         final Collection<Candidate> candidates = new LinkedList<>();
@@ -103,9 +107,44 @@ public class ExcelDataImport {
         if (!areMandatoryFieldsPresent(row)) return null;
         Candidate candidate = new Candidate();
         //Candidate::Id
-        candidate.setId(IDGenerator.INSTANCE.getUUID());
+        //candidate.setId(IDGenerator.INSTANCE.getUUID());
+        //need to fetch the id from excel itself
+        //mandatory field
+        String usrId = getValueAsString(row.getCell(ExcelColumns.USER_ID.asInt()));
+        long id = 0L;
+        if ( usrId != null) {
+	        try {
+	        	id = Long.parseLong(usrId);
+	        }catch(NumberFormatException nfe) {
+	        	return null;
+	        }
+        } else {
+        	return null;
+        }
+        candidate.setId(id);
         //Candidate::Name;
         candidate.setName(getValueAsString(row.getCell(ExcelColumns.NAME.asInt())));
+        
+        //Candidate::DOB
+        Dob dob = getDOB(getDateValueAsString(row.getCell(ExcelColumns.DATE_OF_BIRTH.asInt())), getValueAsString(row.getCell(ExcelColumns.TIME_OF_BIRTH.asInt())));
+        candidate.setDob(dob);
+        
+        //Candidate::Marital Staus
+        candidate.setMaritalStatus(getValueAsString(row.getCell(ExcelColumns.MARITAL_STATUS.asInt())));
+        
+        //Candidate::Horoscope
+    	Star star = HoroscopeConstants.Star.fromString(getValueAsString(row.getCell(ExcelColumns.STAR.asInt())));
+        String birthPlace = getValueAsString(row.getCell(ExcelColumns.NATIVE.asInt()));
+        int paadham = getPaadham(row.getCell(ExcelColumns.IRUPPU.asInt()));
+		Raasi raasi = HoroscopeConstants.Raasi.fromString(getValueAsString(row.getCell(ExcelColumns.RASI.asInt())));
+		Raasi lagnam = HoroscopeConstants.Raasi.fromString(getValueAsString(row.getCell(ExcelColumns.LAGNAM.asInt())));
+		String raahu_kethu = getValueAsString(row.getCell(ExcelColumns.RAAHU_KETHU.asInt()));
+		String sevvai = getValueAsString(row.getCell(ExcelColumns.SEVVAI.asInt()));
+		Planet dasa = HoroscopeConstants.Planet.fromString(getValueAsString(row.getCell(ExcelColumns.DASA.asInt())));
+		String iruppu = getValueAsString(row.getCell(ExcelColumns.IRUPPU.asInt()));
+		Horoscope horoscope = new Horoscope(dob, birthPlace, star, paadham, raasi, lagnam, raahu_kethu, sevvai, dasa, iruppu);
+		candidate.setHoroscope(horoscope);
+		
         //Candidate::gender
         candidate.setGender(Candidate.Gender.fromString(getValueAsString(row.getCell(ExcelColumns.GENDER.asInt()))));
         //Physique::skinTone
@@ -127,11 +166,9 @@ public class ExcelDataImport {
         //Candidate::ExternalUserId
         candidate.setExternalUserId(getValueAsString(row.getCell(ExcelColumns.EXTERNAL_USER_ID.asInt())));
         //Candidate::Note
-        Collection<Note> notes = getNotes(new String[]{getValueAsString(row.getCell(ExcelColumns.NOTE_1.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_2.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_3.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_4.asInt()))});
+        Collection<Note> notes = getNotes(new String[]{getValueAsString(row.getCell(ExcelColumns.NOTE_1.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_2.asInt())), getValueAsString(row.getCell(ExcelColumns.NOTE_3.asInt()))});
         candidate.getNotes().addAll(notes);
-        //Candidate::DOB
-        Dob dob = getDOB(getDateValueAsString(row.getCell(ExcelColumns.DATE_OF_BIRTH.asInt())), getValueAsString(row.getCell(ExcelColumns.TIME_OF_BIRTH.asInt())));
-        candidate.setDob(dob);
+
         return candidate;
     }
 
@@ -234,13 +271,40 @@ public class ExcelDataImport {
             cell.setCellType(Cell.CELL_TYPE_STRING);
         }
         String stringCellValue = cell.getStringCellValue();
+        //FIXME this may be needed until we use excel for profile matching 
+        if(stringCellValue.contains("*")) {
+        	stringCellValue = null;
+        }
         return stringCellValue;
     }
 
+    private static Long getValueAsLong(Cell cell) {
+        String value = getValueAsString(cell);
+        if ( !(value == null || value.isEmpty())) {
+        	long id = 0L;
+	        try {
+	        	id = Long.parseLong(value);
+	        	return id;
+	        }catch(NumberFormatException nfe) {
+	        	return null;
+	        }
+        }
+        return null;
+    }
+    
+    private static int getPaadham(Cell cell) {
+    	Long p = getValueAsLong(cell);
+        int paadham = 0;
+		if (p != null) {
+			paadham = p.intValue();
+		}
+		return paadham;
+    }
     private static boolean areMandatoryFieldsPresent(Row row) {
         Request nameRequest = new Request(row.getCell(ExcelColumns.NAME.asInt()), ExcelColumns.NAME);
         Request genderRequest = new Request(row.getCell(ExcelColumns.GENDER.asInt()), ExcelColumns.GENDER);
-        List<Request> mandatoryFields = Arrays.asList(new Request[]{nameRequest, genderRequest});
+        Request idRequest = new Request(row.getCell(ExcelColumns.USER_ID.asInt()), ExcelColumns.USER_ID);
+        List<Request> mandatoryFields = Arrays.asList(new Request[]{idRequest, nameRequest, genderRequest});
         List<Response> responseList = mandatoryFields.stream().map(request -> isCellValid(request)).collect(Collectors.toList());
         Optional<Response> any = responseList.parallelStream().filter(response -> response.isValid == false).findAny();
         if (any.isPresent()) {
@@ -259,7 +323,11 @@ public class ExcelDataImport {
 
     private static Response isCellValid(Request request) {
         Response r = new Response(request);
-        r.isValid = isCellValid(request.cell);
+        if(request.fieldType == ExcelColumns.USER_ID) {
+        	r.isValid = isCellValidNumber(request.cell);
+        } else {
+        	r.isValid = isCellValid(request.cell);
+        }
         return r;
     }
 
@@ -272,7 +340,11 @@ public class ExcelDataImport {
 
         return !(value == null || value.isEmpty());
     }
-
+    
+    private static boolean isCellValidNumber(Cell cell) {
+        Long value = getValueAsLong(cell);
+        return (value != null);
+    }
 
     public static void main(String[] args) {
         if (args == null || args.length != 1) {
@@ -291,25 +363,38 @@ public class ExcelDataImport {
     }
 
     enum ExcelColumns {
+    	USER_ID(0),
         EXTERNAL_USER_ID(1),
         GENDER(2),
         NAME(3),
+        STAR(4),
         DATE_OF_BIRTH(6),
         TIME_OF_BIRTH(7),
-        SKINTONE(20),
-        HEIGHT(21),
-        BLOODGROUP(22),
-        PHONE_1(23),
-        PHONE_2(24),
-        PHONE_3(25),
-        EDUCATION(16),
-        OCCUPATION_TITLE(19),
-        OCCUPATION_PLACE(17),
-        OCCUPATION_SALARY(18),
-        NOTE_1(28),
-        NOTE_2(29),
-        NOTE_3(30),
-        NOTE_4(31);
+        NATIVE(8),
+        KULAM(9),
+        PADHAM(10),
+        RASI(11),
+        LAGNAM(12),
+        RAAHU_KETHU(13),
+        SEVVAI(14),
+        DASA(15),
+        IRUPPU(16),
+        EDUCATION(17),
+        OCCUPATION_PLACE(18),
+        OCCUPATION_SALARY(19),
+        OCCUPATION_TITLE(20),
+        SKINTONE(21),
+        HEIGHT(22),
+        BLOODGROUP(23),
+        PHONE_1(24),
+        PHONE_2(25),
+        PHONE_3(26),
+        LATE(27),
+        MARITAL_STATUS(28),
+        NOTE_1(29),
+        NOTE_2(30),
+        NOTE_3(31);
+
 
         private int columnIndex;
 
