@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -116,10 +117,15 @@ public class ExcelDataImport {
         final StringBuilder rowBuilder = new StringBuilder();
         rowBuilder.append(row.getSheet().getSheetName() + " - row :" + (row.getRowNum() + 1)).append("->").append("|");
         rowBuilder.append(errorMsg).append("|");
+        int cellNum = 0;
         while (cellIterator.hasNext()) {
             Cell cell = cellIterator.next();
             String cellValue = getValueAsString(cell);
             rowBuilder.append(cellValue).append("|");
+            cellNum++;
+            if (cellNum >= 29) { // skip writing notes cells
+            	break;
+            }
         }
         String rowAsCSV = rowBuilder.toString();
         try {
@@ -146,7 +152,7 @@ public class ExcelDataImport {
         candidate.setName(getValueAsString(row.getCell(ExcelColumns.NAME.asInt())));
 
         //Candidate::DOB
-        Dob dob = getDOB(getDateValueAsString(row.getCell(ExcelColumns.DATE_OF_BIRTH.asInt())), getValueAsString(row.getCell(ExcelColumns.TIME_OF_BIRTH.asInt())));
+        Dob dob = getDOB(getDateValueAsString(row.getCell(ExcelColumns.DATE_OF_BIRTH.asInt()), DTFormatter.INSTANCE.getDateFormatter()), getDateValueAsString(row.getCell(ExcelColumns.TIME_OF_BIRTH.asInt()),DTFormatter.INSTANCE.getTimeFormatter()));
         candidate.setDob(dob);
         
         //Candidate::Marital Staus
@@ -283,8 +289,8 @@ public class ExcelDataImport {
         }        
     }
 
-    public static String getDateValueAsString(Cell cell) throws DataError {
-    	logger.debug("ENTER - getDateValueAsString : ," + cell);
+    public static String getDateValueAsString(Cell cell, DateTimeFormatter dtf) throws DataError {
+    	logger.debug("ENTER - getDateValueAsString : " + cell);
         if (cell == null) return null;
         String dateValueAsString;
         try {
@@ -293,7 +299,7 @@ public class ExcelDataImport {
         	{
 	        	LocalDate dateValueAsLocalDate = DTFormatter.INSTANCE.getLocalDateFrom(cell.getDateCellValue());
 	        	logger.debug("dateValueAsLocalDate : " + dateValueAsLocalDate);
-	            dateValueAsString = dateValueAsLocalDate.format(DTFormatter.INSTANCE.getDateFormatter());
+	            dateValueAsString = dateValueAsLocalDate.format(dtf);
         	}else {
         		//FIXME this may be needed until we use excel for profile matching 
         		String tempStr = cell.getStringCellValue(); 
@@ -304,7 +310,7 @@ public class ExcelDataImport {
 		            dateValueAsString = tempStr;
 	        	}
         	}
-        } catch (IllegalStateException ise) {
+        } catch (Exception ise) {
             dateValueAsString = null;
             throw new DataError("Invalid DOB :"+ ise.toString());
         }
@@ -402,7 +408,7 @@ public class ExcelDataImport {
         final String fileName = args[0];
         List<String> sheetsToRead = null;
         if (args.length > 1 && args[1] != null && args[1].length() > 0) {
-        	sheetsToRead = Arrays.asList(args[1]);
+        	sheetsToRead = Arrays.asList((args[1].split(",")));
     	}
         try {
         	Logger.getRootLogger().setLevel(Level.INFO);
