@@ -37,7 +37,7 @@ public class ExcelDataImport {
     }
 
 
-    public static Collection<Candidate> importData(String fileName) throws IOException {
+    public static Collection<Candidate> importData(String fileName, List<String> sheetsToRead) throws IOException {
         final Collection<Candidate> candidates = new LinkedList<>();
         Set<Report> reports = new LinkedHashSet<>();
         FileInputStream fileInputStream = new FileInputStream(fileName);
@@ -54,7 +54,12 @@ public class ExcelDataImport {
         FileWriter csvWriter = new FileWriter(csvFileName);
         logger.info(fileName + " read completed.");
         logger.info("Number of sheets:" + workbook.getNumberOfSheets());
-
+        boolean readAllSheets = false;
+        if(sheetsToRead == null ) {
+        	readAllSheets = true;
+        }
+        logger.info("readAllSheets:" + readAllSheets);
+        logger.info("sheetsToRead:" + sheetsToRead);
         int sheetCounter = 0;
         long beanCounter;
         Candidate candidate = null;
@@ -63,6 +68,9 @@ public class ExcelDataImport {
             beanCounter = 0;
             logger.info("Reading sheet # " + (sheetCounter + 1) + " with row count = " + sheet.getLastRowNum() + 1);
             for (Row row : sheet) {
+            	if(!readAllSheets && !sheetsToRead.contains(row.getSheet().getSheetName())) {
+            		continue;
+            	}
                 //skip the header row
                 if (row.getRowNum() == 0) continue;
                 try {
@@ -386,15 +394,20 @@ public class ExcelDataImport {
     }
 
     public static void main(String[] args) {
-        if (args == null || args.length != 1) {
-            System.out.println("java com.poople.promat.ExcelDataImport <path-to-xls-file>");
+        if (args == null || args.length < 1) {
+            System.out.println("java com.poople.promat.ExcelDataImport <path-to-xls-file> <sheetname1,sheetname2,sheetname3>");
+            System.out.println("if argument #2 is not provided, all sheets in the excel will be read.");
             return;
         }
         final String fileName = args[0];
+        List<String> sheetsToRead = null;
+        if (args.length > 1 && args[1] != null && args[1].length() > 0) {
+        	sheetsToRead = Arrays.asList(args[1]);
+    	}
         try {
         	Logger.getRootLogger().setLevel(Level.INFO);
             long startTime = System.currentTimeMillis();
-            ExcelDataImport.importData(fileName);
+            ExcelDataImport.importData(fileName, sheetsToRead);
             long timeTaken = System.currentTimeMillis() - startTime;
             logger.info("Completed in " + (timeTaken / 1000) + "s");
         } catch (IOException e) {
