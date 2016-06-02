@@ -224,16 +224,21 @@ public class ExcelDataImport {
         Occupation occupation = new Occupation();
         occupation.setTitle(title != null ? title.trim() : title);
         occupation.setCompanyLocation(place != null ? place.trim() : place);
+        long multiples = 1;
         if (salary != null) {
             salary = salary.trim();
             salary = salary.replaceAll(" ", "");
             if (salary.indexOf("L") > 0 || salary.indexOf("l") > 0) {
                 salary = salary.replaceAll("[Ll]", "");
-                try {
-                    Double aDouble = Double.parseDouble(salary);
-                    occupation.setSalary(aDouble * 100000);
-                } catch (NumberFormatException nfe) {
-                }
+                multiples = 100000;
+            }else if (salary.indexOf("K") > 0 || salary.indexOf("k") > 0) {
+                salary = salary.replaceAll("[Kk]", "");
+                multiples = 1000;
+            }  
+            try {
+                Double aDouble = Double.parseDouble(salary);
+                occupation.setSalary(aDouble * multiples);
+            } catch (NumberFormatException nfe) {
             }
         }
         return occupation;
