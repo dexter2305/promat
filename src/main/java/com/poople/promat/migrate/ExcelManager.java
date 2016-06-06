@@ -5,32 +5,27 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.format.CellFormat;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.util.IOUtils;
 
 public class ExcelManager {
 
@@ -53,12 +48,15 @@ public class ExcelManager {
 		return file;
 	}
 
-	protected boolean fileExists(String strFile) throws Exception {
+	protected boolean fileExists(String strFile) {
 		logger.info("ENTER - fileExists(String) : " + strFile);
+		try {
+			File file = getFile(strFile);
+			if (file.exists()) {
+				return true;
+			}
+		} catch (Exception e) {
 
-		File file = getFile(strFile);
-		if (file.exists()) {
-			return true;
 		}
 		logger.info("EXIT - fileExists(String) - false");
 		return false;
@@ -226,8 +224,17 @@ public class ExcelManager {
 
 	}
 
+	protected void retreiveAndSetCells(Sheet sheet, CellReference cf, String cellValue) {
+
+		logger.info("ENTER - retreiveAndSetCells() : " + sheet + " , " + cf + " , " + cellValue + " , " + null);
+		if (cf != null) {
+			retreiveAndSetCells(sheet, cf.getRow(), cf.getCol(), cellValue, null);
+		}
+	}
+
 	protected void retreiveAndSetCells(Sheet sheet, int rownum, int colNum, String cellValue) {
-		logger.info("ENTER - retreiveAndSetCells() : " + sheet + " , " + rownum + " , " + colNum + " , " + cellValue + " , " + null);
+		logger.info("ENTER - retreiveAndSetCells() : " + sheet + " , " + rownum + " , " + colNum + " , " + cellValue
+				+ " , " + null);
 		retreiveAndSetCells(sheet, rownum, colNum, cellValue, null);
 	}
 
@@ -243,18 +250,33 @@ public class ExcelManager {
 		}
 
 	}
-	protected void retreiveAndSetCells(Sheet sheet, int rownum, int colNum, RichTextString cellValue, CellStyle csWithDf) {
-		Cell cell = sheet.getRow(rownum).getCell(colNum);
-		if (cellValue != null) {
-			if (csWithDf != null)
-				cell.setCellStyle(csWithDf);
-			cell.setCellType(Cell.CELL_TYPE_STRING);
-			cell.setCellValue(cellValue);
-		} else {
-			cell.setCellValue(Cell.CELL_TYPE_BLANK);
-		}
 
+	protected void setImage(Workbook workbook, Sheet sheet, int rownum, int colNum, String imgFileName) {
+		logger.info("ENTER - setImage() : " + sheet + " , " + rownum + " , " + colNum + " , " + imgFileName);
+		if (imgFileName != null) {
+			InputStream inputStream;
+			try {
+				inputStream = new FileInputStream(imgFileName);
+				byte[] imageBytes = IOUtils.toByteArray(inputStream);
+				int pictureureIdx = workbook.addPicture(imageBytes, Workbook.PICTURE_TYPE_PNG);
+				inputStream.close();
+				CreationHelper helper = workbook.getCreationHelper();
+				Drawing drawing = sheet.createDrawingPatriarch();
+				ClientAnchor anchor = helper.createClientAnchor();
+				anchor.setAnchorType(2);
+				anchor.setCol1(colNum);
+				anchor.setRow1(rownum);
+				anchor.setCol2(colNum + 12);
+				anchor.setRow2(rownum + 7);
+				drawing.createPicture(anchor, pictureureIdx);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
 	}
+
 	protected void retreiveAndSetCells(Sheet sheet, int rownum, int colNum, Date cellValue, CellStyle csWithDf) {
 		Cell cell = sheet.getRow(rownum).getCell(colNum);
 		if (cellValue != null) {

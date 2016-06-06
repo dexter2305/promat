@@ -4,41 +4,27 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.CellReference;
-import org.apache.poi.sl.usermodel.Notes;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import com.poople.promat.adapters.DTFormatter;
 import com.poople.promat.models.Candidate;
-import com.poople.promat.models.Dob;
 import com.poople.promat.models.Education;
 import com.poople.promat.models.Horoscope;
 import com.poople.promat.models.Note;
@@ -49,13 +35,15 @@ public class ExcelProfileWriter {
 	private String excelPrintTemplateFile;
 	private String horoscopeImageDir;
 	private String profileWriteDir;
+	private String photoImageDir;
+	private String rasiTableBlank;
+
 	private CellReference nameCf;
 	private CellReference htCf;
 	private CellReference userIdCf;
 	private CellReference phCf;
 	private CellReference kulamCf;
 	private CellReference starCf;
-	private CellReference padhamCf;
 	private CellReference date_dayCf;
 	private CellReference timeCf;
 	private CellReference birthplaceCf;
@@ -68,13 +56,16 @@ public class ExcelProfileWriter {
 	private CellReference educationCf;
 	private CellReference occupation_salaryCf;
 	private CellReference workplaceCf;
-	private CellReference noteCf;
+	private CellReference noteCf; // not used as of now
+	private CellReference navamsamtabCf;
+	private CellReference rasitabCf;
 	private Map<String, CellReference> cellRefMap = null;
-
+	private File horoscopeImageDirFile;
+	private File photoImageDirFile;
 	private static final Log logger = LogFactory.getLog(ExcelProfileWriter.class);
-	private static final List<String> cellRefs = Arrays.asList("userid", "name", "ph", "kulam", "ht", "star", "padham",
-			"date_day", "time", "birthplace", "rasi", "lagnam", "rahukethu", "sevvai", "dasa", "iruppu", "education",
-			"occupation_salary", "workplace", "note");
+	private static List<String> cellRefs = Arrays.asList("userid", "name", "ph", "kulam", "ht", "star", "date_day",
+			"time", "birthplace", "rasi", "lagnam", "rahukethu", "sevvai", "dasa", "iruppu", "education",
+			"occupation_salary", "workplace", "note", "rasitab", "navamsamtab");
 
 	private ExcelManager xlMgr;
 
@@ -91,7 +82,8 @@ public class ExcelProfileWriter {
 		this.excelPrintTemplateFile = configProps.getProperty("excelPrintTemplateFile");
 		this.profileWriteDir = configProps.getProperty("profileWriteDir");
 		this.horoscopeImageDir = configProps.getProperty("horoscopeImageDir");
-
+		this.rasiTableBlank = configProps.getProperty("rasiTableBlank");
+		this.photoImageDir = configProps.getProperty("photoImageDir");
 		// Validate if all required cell references are present in input config
 		List<String> notPresentList = cellRefs.stream().filter((propName) -> (!configProps.containsKey(propName)))
 				.collect(Collectors.toList());
@@ -99,16 +91,29 @@ public class ExcelProfileWriter {
 			throw new Exception("One or more config values are not persent for following properties : "
 					+ notPresentList.toString());
 		}
-		this.cellRefMap = cellRefs.stream().filter((propName) -> (configProps.containsKey(propName)))
-				.collect(Collectors.toMap((propName) -> propName.toString(), (propName) -> {
-					String value = configProps.getProperty(propName, null);
-					if (value != null && value.trim().length() > 0) {
-						CellReference cf = new CellReference(value.trim());
-						return cf;
-					} else {
-						return null;
-					}
-				}));
+		this.cellRefMap = cellRefs.stream().filter((propName) -> {
+			if (configProps.containsKey(propName)) {
+				String value = configProps.getProperty(propName, "");
+				if (value != null && value.trim().length() <= 0) {
+					// cell not specified so skip writing the cell
+					logger.info(
+							"No value given for property '" + propName + "' and it will NOT be written to template.");
+					return false;
+				} else {
+					return true;
+				}
+			} else {
+				return false;
+			}
+		}).collect(Collectors.toMap((propName) -> propName.toString(), (propName) -> {
+			String value = configProps.getProperty(propName, "");
+			if (value != null && value.trim().length() > 0) {
+				CellReference cf = new CellReference(value.trim());
+				return cf;
+			} else {
+				return null;
+			}
+		}));
 
 		this.xlMgr = new ExcelManager();
 
@@ -119,7 +124,18 @@ public class ExcelProfileWriter {
 	}
 
 	private void validate() throws Exception {
-		if (!xlMgr.fileExists(this.horoscopeImageDir)) {
+
+		if (!xlMgr.fileExists(this.rasiTableBlank)) {
+			new Exception("Could not find blank rasi table image named '" + this.rasiTableBlank + "'");
+		}
+		try {
+			photoImageDirFile = xlMgr.getFile(this.photoImageDir);
+		} catch (Exception e) {
+			new Exception("Could not find photo image directory named '" + this.photoImageDir + "'");
+		}
+		try {
+			horoscopeImageDirFile = xlMgr.getFile(this.horoscopeImageDir);
+		} catch (Exception e) {
 			new Exception("Could not find horoscope image directory named '" + this.horoscopeImageDir + "'");
 		}
 		if (!xlMgr.fileExists(this.profileWriteDir)) {
@@ -150,7 +166,6 @@ public class ExcelProfileWriter {
 		phCf = cellRefMap.get("ph");
 		kulamCf = cellRefMap.get("kulam");
 		starCf = cellRefMap.get("star");
-		padhamCf = cellRefMap.get("padham");
 		date_dayCf = cellRefMap.get("date_day");
 		timeCf = cellRefMap.get("time");
 		birthplaceCf = cellRefMap.get("birthplace");
@@ -164,6 +179,8 @@ public class ExcelProfileWriter {
 		occupation_salaryCf = cellRefMap.get("occupation_salary");
 		workplaceCf = cellRefMap.get("workplace");
 		noteCf = cellRefMap.get("note");
+		rasitabCf = cellRefMap.get("rasitab");
+		navamsamtabCf = cellRefMap.get("navamsamtab");
 
 		StringBuilder errorMsg = new StringBuilder();
 		boolean hasErrors = false;
@@ -175,7 +192,7 @@ public class ExcelProfileWriter {
 				Workbook wb = null;
 				Sheet s = null;
 				if (candidateFile.exists()) {
-					//FIXME not working 
+					// FIXME not working
 					wb = xlMgr.openWorkBook(candidateFile);
 					// rename if sheet with name already exists
 					s = wb.getSheet(this.profileSheetName);
@@ -208,50 +225,64 @@ public class ExcelProfileWriter {
 
 	private void updateProfileData(Workbook wb, Sheet s, Candidate c) {
 
-		xlMgr.retreiveAndSetCells(s, userIdCf.getRow(), userIdCf.getCol(), String.valueOf(c.getId()));
-		xlMgr.retreiveAndSetCells(s, phCf.getRow(), phCf.getCol(), "PH - ");
-		xlMgr.retreiveAndSetCells(s, nameCf.getRow(), nameCf.getCol(), c.getName());
-		xlMgr.retreiveAndSetCells(s, htCf.getRow(), htCf.getCol(),
-				formatAsString(c.getPhysique().getHeight(), 4) + "cm");
-		xlMgr.retreiveAndSetCells(s, kulamCf.getRow(), kulamCf.getCol(), c.getKulam());
+		xlMgr.retreiveAndSetCells(s, userIdCf, String.valueOf(c.getId()));
+		String imgFileStatus = "";
+		if (c.getExternalUserId() != null && !c.getExternalUserId().isEmpty()) {
+			String[] fileNames = photoImageDirFile.list((File dirToFilter,
+					String filename) -> ((filename.toUpperCase().startsWith("KK" + c.getExternalUserId()))
+							&& (filename.toUpperCase().endsWith(".JPEG") || filename.toUpperCase().endsWith(".JPG")
+									|| filename.toUpperCase().endsWith(".PNG")
+									|| filename.toUpperCase().endsWith(".GIF"))));
+			if (fileNames != null && fileNames.length > 0) {
+				imgFileStatus = "Com"; // meaning present in C as in Computer
+
+			}
+		}
+
+		xlMgr.retreiveAndSetCells(s, phCf, "Ph - " + imgFileStatus);
+		xlMgr.retreiveAndSetCells(s, nameCf, c.getName());
+		xlMgr.retreiveAndSetCells(s, htCf, formatAsString(c.getPhysique().getHeight(), 4) + "cm");
+		xlMgr.retreiveAndSetCells(s, kulamCf, c.getKulam());
 		// xlMgr.retreiveAndSetCells(s, date_dayCf.getRow(),
 		// date_dayCf.getCol(),
 		// (c.getDob().getBirthdate()!=null)?c.getDob().getBirthdate().format(DTFormatter.INSTANCE.getDateFormatter()):null);
-		xlMgr.retreiveAndSetCells(s, date_dayCf.getRow(), date_dayCf.getCol(),
-				datefmt.apply(c.getDob().getBirthdate()));
+		xlMgr.retreiveAndSetCells(s, date_dayCf, datefmt.apply(c.getDob().getBirthdate()));
 
 		// xlMgr.retreiveAndSetCells(s, timeCf.getRow(), timeCf.getCol(),
 		// (c.getDob().getBirthtime() !=
 		// null)?c.getDob().getBirthtime().format(DTFormatter.INSTANCE.getTimeFormatter()):null);
-		xlMgr.retreiveAndSetCells(s, timeCf.getRow(), timeCf.getCol(), timefmt.apply(c.getDob().getBirthtime()));
+		xlMgr.retreiveAndSetCells(s, timeCf, timefmt.apply(c.getDob().getBirthtime()));
 
 		Horoscope h = c.getHoroscope();
-		xlMgr.retreiveAndSetCells(s, starCf.getRow(), starCf.getCol(),
+		xlMgr.retreiveAndSetCells(s, starCf,
 				strfmt.apply(h.getStar()) + ", Padham " + (h.getPaadham() != 0 ? String.valueOf(h.getPaadham()) : ""));
 		// xlMgr.retreiveAndSetCells(s, padhamCf.getRow(), padhamCf.getCol(),
 		// "Paadham " + strfmt.apply(h.getPaadham()));
-		xlMgr.retreiveAndSetCells(s, birthplaceCf.getRow(), birthplaceCf.getCol(), h.getBirthPlace());
-		xlMgr.retreiveAndSetCells(s, rasiCf.getRow(), rasiCf.getCol(), strfmt.apply(h.getRaasi()));
-		xlMgr.retreiveAndSetCells(s, lagnamCf.getRow(), lagnamCf.getCol(), strfmt.apply(h.getLagnam()));
-		xlMgr.retreiveAndSetCells(s, rahukethuCf.getRow(), rahukethuCf.getCol(), h.getRaahu_kethu());
-		xlMgr.retreiveAndSetCells(s, sevvaiCf.getRow(), sevvaiCf.getCol(), h.getSevvai());
-		xlMgr.retreiveAndSetCells(s, dasaCf.getRow(), dasaCf.getCol(), strfmt.apply(h.getDasa()));
-		xlMgr.retreiveAndSetCells(s, iruppuCf.getRow(), iruppuCf.getCol(), h.getIruppu());
-		Education e = null;
-		if (!c.getEducations().isEmpty()) {
-			e = c.getEducations().iterator().next();
+		xlMgr.retreiveAndSetCells(s, birthplaceCf, h.getBirthPlace());
+		xlMgr.retreiveAndSetCells(s, rasiCf, strfmt.apply(h.getRaasi()));
+		xlMgr.retreiveAndSetCells(s, lagnamCf, strfmt.apply(h.getLagnam()));
+		xlMgr.retreiveAndSetCells(s, rahukethuCf, h.getRaahu_kethu());
+		xlMgr.retreiveAndSetCells(s, sevvaiCf, h.getSevvai());
+		xlMgr.retreiveAndSetCells(s, dasaCf, strfmt.apply(h.getDasa()));
+		xlMgr.retreiveAndSetCells(s, iruppuCf, h.getIruppu());
+		String joinedQual = "";
+		Set<Education> e = c.getEducations();
+		if (e != null) {
+			joinedQual = e.stream().map(Education::getQualification).collect(Collectors.joining(", "));
 		}
-		xlMgr.retreiveAndSetCells(s, educationCf.getRow(), educationCf.getCol(),
-				(e != null) ? strfmt.apply(e.getQualification()) : padString("", 20));
+		xlMgr.retreiveAndSetCells(s, educationCf, strfmt.apply(joinedQual));
 
 		Occupation o = null;
 		if (!c.getOccupations().isEmpty()) {
 			// as of now only one occupation is stored in excel
 			o = c.getOccupations().iterator().next();
 		}
-		xlMgr.retreiveAndSetCells(s, occupation_salaryCf.getRow(), occupation_salaryCf.getCol(),
-				strfmt.apply(o.getTitle()) + ", " + strfmt.apply(o.getSalary().longValue()));
-		xlMgr.retreiveAndSetCells(s, workplaceCf.getRow(), workplaceCf.getCol(), o.getCompanyLocation());
+		Long salary = null;
+		if (o.getSalary() != null) {
+			salary = o.getSalary().longValue();
+		}
+		xlMgr.retreiveAndSetCells(s, occupation_salaryCf, strfmt.apply(o.getTitle()) + ", " + strfmt.apply(salary));
+		xlMgr.retreiveAndSetCells(s, workplaceCf, o.getCompanyLocation());
 		Note n = null;
 		if (!c.getNotes().isEmpty()) {
 			// as of now only one occupation is stored in excel
@@ -259,15 +290,40 @@ public class ExcelProfileWriter {
 			n = i.next();
 			n = i.hasNext() ? i.next() : null;
 		}
+		xlMgr.retreiveAndSetCells(s, noteCf, strfmt.apply(n.getNote()));
 
-		xlMgr.retreiveAndSetCells(s, noteCf.getRow(), noteCf.getCol(), strfmt.apply(n.getNote()));
+		writeHoroTables(wb, s, c);
+	}
 
+	private void writeHoroTables(Workbook wb, Sheet s, Candidate c) {
+		String rasiTab = this.rasiTableBlank;
+		String navamsamTab = this.rasiTableBlank;
+
+		if (c.getExternalUserId() != null && !c.getExternalUserId().trim().isEmpty()) {
+			logger.debug("Rasi Table Name: " + "KK" + c.getExternalUserId());
+			String[] fileNames = horoscopeImageDirFile.list((File dirToFilter,
+					String filename) -> (filename.toUpperCase().startsWith("KK" + c.getExternalUserId())));
+			if (fileNames != null && fileNames.length > 0) {
+				for (String f : fileNames) {
+					if (f.contains("NAVAMSATAM")) {
+						navamsamTab = this.horoscopeImageDir + f;
+					} else if (f.contains("RASITAM")) {
+						rasiTab = this.horoscopeImageDir + f;
+					}
+				}
+
+			}
+		}
+		xlMgr.setImage(wb, s, rasitabCf.getRow(), rasitabCf.getCol(), rasiTab);
+		xlMgr.setImage(wb, s, navamsamtabCf.getRow(), navamsamtabCf.getCol(), navamsamTab);
 	}
 
 	private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm[:ss][a]");
+	private static final Function<String, String> toCamelCase = (s) -> (s.substring(0, 1) + s.substring(1).toLowerCase());
 	private static final Function<LocalDate, String> datefmt = (d) -> (d != null)
-			? (d.format(dateFormatter) + "," + d.getDayOfWeek().toString()) : padString("", 20);
+			? (d.format(dateFormatter) + ", " + toCamelCase.apply(d.getDayOfWeek().toString())) : padString("", 20);
+	
 	private static final Function<LocalTime, String> timefmt = (d) -> (d != null) ? d.format(timeFormatter)
 			: padString("", 20);
 	private static final Function<Object, String> strfmt = (d) -> (d != null) ? d.toString() : padString("", 20);
@@ -288,22 +344,21 @@ public class ExcelProfileWriter {
 
 	public static void main(String[] args) throws Exception {
 
-//		if (args == null || args.length != 2) {
-//			System.out.println("java com.poople.promat.ExcelProfileWriter <xls-to-import> <path-to-writer-conf-file>");
-//			return;
-//		}
-//		final String fileName = args[0];
-//		final String confFile = args[1];
-//		List<String> sheetsToRead = null;
-//        if (args.length > 1 && args[1] != null && args[1].length() > 0) {
-//        	sheetsToRead = Arrays.asList((args[1].split(",")));
-//    	}
-		 final String fileName =
-		 "D:/sandbox/promat2605/data/z_srinivasan_30052016.xls";
-		 final String confFile =
-		 "D:/sandbox/promat2605/promat/src/main/resources/a4print.conf";
-		 final List<String> sheetsToRead = new ArrayList<String>();
-		 sheetsToRead.add("Poornima300516");
+		// if (args == null || args.length != 2) {
+		// System.out.println("java com.poople.promat.ExcelProfileWriter
+		// <xls-to-import> <path-to-writer-conf-file>");
+		// return;
+		// }
+		// final String fileName = args[0];
+		// final String confFile = args[1];
+		// List<String> sheetsToRead = null;
+		// if (args.length > 1 && args[1] != null && args[1].length() > 0) {
+		// sheetsToRead = Arrays.asList((args[1].split(",")));
+		// }
+		final String fileName = "D:/sandbox/promat2605/data/z_srinivasan_06062016.xls";
+		final String confFile = "D:/sandbox/promat2605/promat/src/main/resources/a4print.conf";
+		final List<String> sheetsToRead = new ArrayList<String>();
+		sheetsToRead.add("sree");
 
 		try {
 			long startTime = System.currentTimeMillis();

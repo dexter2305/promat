@@ -69,8 +69,9 @@ public class ExcelDataImport {
             	if(!readAllSheets && !sheetsToRead.contains(row.getSheet().getSheetName())) {
             		continue;
             	}
-                //skip the header row
-                if (row.getRowNum() == 0) continue;
+                //skip the header row and next row (2 rows) 
+            	//TODO configure
+                if (row.getRowNum() <= 1) continue;
                 try {
 					candidate = getCandidateBean(row);
 					if (candidate != null) {
@@ -327,10 +328,14 @@ public class ExcelDataImport {
             cell.setCellType(Cell.CELL_TYPE_STRING);
         }
         String stringCellValue = cell.getStringCellValue();
+        if(stringCellValue.contains("Not Specified")) {
+        	stringCellValue.replaceAll("Not Specified", "");
+        }
         //FIXME this may be needed until we use excel for profile matching 
         if(stringCellValue.contains("*") || stringCellValue.trim().isEmpty()) {
         	stringCellValue = null;
         }
+        
         logger.debug("EXIT - getValueAsString : " + stringCellValue);
         return stringCellValue;
     }
