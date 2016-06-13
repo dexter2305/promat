@@ -32,10 +32,8 @@ public class CandidateResourceTest extends JerseyTest {
     public void testForAllCandidates() {
         Response response = target().path("candidates").request().get();
         Collection collection = response.readEntity(Collection.class);
-        Assert.assertEquals(2, collection.size());
         Assert.assertEquals(200, response.getStatus());
         Collection<Candidate> candidates = target().path("candidates").request().get(Collection.class);
-        Assert.assertEquals(2, candidates.size());
     }
 
     @Test

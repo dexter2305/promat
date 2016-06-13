@@ -2,6 +2,7 @@ package com.poople.promat.persistence;
 
 import com.poople.promat.migrate.ExcelDataImport;
 import com.poople.promat.models.*;
+import com.poople.promat.persistence.ormlite.StoreException;
 import com.poople.promat.resources.Filter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,6 +37,16 @@ public class InMemoryDatabase implements IStore {
         }
 
 
+    }
+
+    @Override
+    public void setup() throws StoreException {
+
+    }
+
+    @Override
+    public void cleanUp() throws StoreException {
+        store.clear();
     }
 
     @Override

@@ -4,6 +4,7 @@ package com.poople.promat.resources;
 import com.poople.promat.models.Candidate;
 import com.poople.promat.persistence.IStore;
 import com.poople.promat.persistence.InMemoryDatabase;
+import com.poople.promat.persistence.ormlite.StoreException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,14 +33,21 @@ public class CandidateResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response get(@PathParam("id") long id) {
         logger.info("read: for candidate with id = " + id);
-        Candidate candidate = db.read(id);
+        Candidate candidate;
         Response response;
-        if (candidate == null) {
-            response = Response.noContent().build();
-        } else {
-            response = Response.ok(candidate).build();
+        try {
+            candidate = db.read(id);
+
+            if (candidate == null) {
+                response = Response.noContent().build();
+            } else {
+                response = Response.ok(candidate).build();
+            }
+            logger.info("read: Candidate(id=" + id + ") returned " + response.getStatus());
+        } catch (StoreException e) {
+            response = Response.serverError().build();
+            logger.error("Error while read: Candidate(id=" + id, e);
         }
-        logger.info("read: Candidate(id=" + id + ") returned " + response.getStatus());
         return response;
     }
 
@@ -47,14 +55,20 @@ public class CandidateResource {
     @Produces({MediaType.APPLICATION_JSON})
     public Response get() {
         logger.info("read: all candidates");
-        Collection<Candidate> candidates = db.readAll();
+        Collection<Candidate> candidates;
         Response response;
-        if (candidates.isEmpty()) {
-            response = Response.noContent().build();
-        } else {
-            response = Response.ok(candidates).build();
+        try {
+            candidates = db.readAll();
+            if (candidates.isEmpty()) {
+                response = Response.noContent().build();
+            } else {
+                response = Response.ok(candidates).build();
+            }
+            logger.info("read: all candidates returned " + response.getStatus());
+        } catch (StoreException e) {
+            logger.error("Error while read: all candidates returned ", e);
+            response = Response.serverError().build();
         }
-        logger.info("read: all candidates returned " + response.getStatus());
         return response;
     }
 
@@ -63,9 +77,14 @@ public class CandidateResource {
     public Response create(Candidate candidate) {
         logger.info("create: " + candidate);
         Response response;
-        db.create(candidate);
-        response = Response.created(URI.create(uriInfo.getAbsolutePath() + "/" + candidate.getId())).build();
-        logger.info("create: " + candidate + " returned " + response.getStatus() + " -> " + response.getLocation().getPath());
+        try {
+            db.create(candidate);
+            response = Response.created(URI.create(uriInfo.getAbsolutePath() + "/" + candidate.getId())).build();
+            logger.info("create: " + candidate + " returned " + response.getStatus() + " -> " + response.getLocation().getPath());
+        } catch (StoreException e) {
+            logger.error("Error while create: " + candidate, e);
+            response = Response.serverError().build();
+        }
         return response;
     }
 
@@ -75,16 +94,26 @@ public class CandidateResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Collection<Candidate> apply(Filter filter){
         logger.debug("filter processing can happen here.... ");
-        return db.apply(filter);
+        try {
+            return db.apply(filter);
+        } catch (StoreException e) {
+            e.printStackTrace();
+        } return null;
     }
 
     @DELETE
     @Path("/{id}")
     public Response delete(@PathParam("id")long candidateId){
         logger.info("delete: " + candidateId);
-        db.delete(candidateId);
-        Response response = Response.ok().build();
-        logger.info("delete: " + candidateId + " returned " + response.getStatus());
+        Response response;
+        try {
+            db.delete(candidateId);
+            response = Response.ok().build();
+            logger.info("delete: " + candidateId + " returned " + response.getStatus());
+        } catch (StoreException e) {
+            logger.error("Error while delete: " + candidateId, e);
+            response = Response.serverError().build();
+        }
         return response;
     }
 
@@ -94,13 +123,18 @@ public class CandidateResource {
     public Response update(Candidate candidate){
         logger.info("update: " + candidate.getId());
         Response response;
-        if (db.read(candidate.getId()) != null){
-            db.update(candidate);
-            response = Response.ok().build();
-        }else{
-            response = Response.status(Response.Status.NOT_FOUND).build();
+        try {
+            if (db.read(candidate.getId()) != null){
+                db.update(candidate);
+                response = Response.ok().build();
+            }else{
+                response = Response.status(Response.Status.NOT_FOUND).build();
+            }
+            logger.info("update: " + candidate.getId() + " returned " + response.getStatus());
+        } catch (StoreException e) {
+            logger.info("Error while update: " + candidate.getId(), e);
+            response = Response.serverError().build();
         }
-        logger.info("update: " + candidate.getId() + " returned " + response.getStatus());
         return response;
     }
 
