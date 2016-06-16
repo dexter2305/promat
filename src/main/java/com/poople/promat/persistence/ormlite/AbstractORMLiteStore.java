@@ -48,9 +48,11 @@ public abstract class AbstractORMLiteStore implements IStore {
 
     @Override
     public void create(Candidate candidate) throws StoreException {
-
-
-
+        try {
+            candidateDao.create(candidate);
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        }
     }
 
     @Override

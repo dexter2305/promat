@@ -13,10 +13,10 @@ import java.sql.SQLException;
 public class SQLiteStore extends AbstractORMLiteStore {
     /*
         Sample SQLite XERIAL driver URL to create a database named "sample-db.dat" in the current directory
-        jdbc:sqlite:.\sample-db.dat
+        jdbc:sqlite:.\sample-db.db
      */
     private static final String PROTOCOL = "jdbc:sqlite:";
-    private static final String DB_NAME = "promat-db-v1.dat";
+    private static final String DB_NAME = "promat-db-v1.db";
     private static String databaseURL = PROTOCOL + DB_NAME;
     private Log logger = LogFactory.getLog(SQLiteStore.class);
 
