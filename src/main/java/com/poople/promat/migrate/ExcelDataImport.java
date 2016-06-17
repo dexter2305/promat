@@ -275,17 +275,26 @@ public class ExcelDataImport {
         return phoneNumbers;
     }
 
-    private static Long getHeightInCms(String heightInFeet) {
-    	logger.debug("ENTER - getHeightInCms() :"+ heightInFeet);
-        if (heightInFeet == null || heightInFeet.trim().isEmpty()) return null;
+    private static Long getHeightInCms(String height) {
+    	logger.debug("ENTER - getHeightInCms() :"+ height);
+        if (height == null || height.trim().isEmpty()) return null;
         try {
-        	heightInFeet = heightInFeet.replaceAll("'", "");
-        	heightInFeet = heightInFeet.replaceAll("\"", "");
-        	heightInFeet = heightInFeet.replaceAll("”", "");
-            Double h = Double.parseDouble(heightInFeet);
-            h = h * 30;
-            logger.debug("EXIT - getHeightInCms() :"+ h.longValue());
-            return h.longValue();
+        	height = height.replaceAll("'", "");
+        	height = height.replaceAll("\"", "");
+        	height = height.replaceAll("”", "");
+        	Double heightInCms = 0d;
+        	Double heightInInches = 0d;
+        	int decimalPt = height.indexOf(".");
+        	if(decimalPt != -1 && height.length() != decimalPt) {
+        		logger.debug("EXIT - getHeightInCms() Feet p1:"+ height.substring(0,decimalPt));
+        		logger.debug("EXIT - getHeightInCms() Feet p2:"+ height.substring(decimalPt+1));
+        		heightInInches = Double.parseDouble(height.substring(0,decimalPt)) * 12 + Double.parseDouble(height.substring(decimalPt+1));
+        	}else {
+        		heightInInches = Double.parseDouble(height) * 12;
+        	}
+        	heightInCms = heightInInches * 2.54;
+            logger.debug("EXIT - getHeightInCms() :"+ Math.round(heightInCms));
+            return Math.round(heightInCms);
         } catch (NumberFormatException nfe) {
         	nfe.printStackTrace();
             return null;

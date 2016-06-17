@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -341,24 +340,24 @@ public class ExcelProfileWriter {
 		}
 		return s;
 	}
-
 	public static void main(String[] args) throws Exception {
+		ExcelProfileWriter.test(args);
+		//ExcelProfileWriter.profileWriter(args);
+	}
+	public static void profileWriter(String[] args) throws Exception {
 
-		// if (args == null || args.length != 2) {
-		// System.out.println("java com.poople.promat.ExcelProfileWriter
-		// <xls-to-import> <path-to-writer-conf-file>");
-		// return;
-		// }
-		// final String fileName = args[0];
-		// final String confFile = args[1];
-		// List<String> sheetsToRead = null;
-		// if (args.length > 1 && args[1] != null && args[1].length() > 0) {
-		// sheetsToRead = Arrays.asList((args[1].split(",")));
-		// }
-		final String fileName = "D:/sandbox/promat2605/data/z_srinivasan_06062016.xls";
-		final String confFile = "D:/sandbox/promat2605/promat/src/main/resources/a4print.conf";
-		final List<String> sheetsToRead = new ArrayList<String>();
-		sheetsToRead.add("sree");
+		 if (args == null || args.length < 2) {
+			 System.out.println("java com.poople.promat.ExcelProfileWriter <path-to-writer-conf-file> <xls-to-import> [sheet1,sheet2]");
+			 System.out.println("if argument #3 is not provided, all sheets in the excel will be read.");
+			 return;
+		 }
+		 final String confFile = args[0];
+		 final String fileName = args[1];
+		 
+		 List<String> sheetsToRead = null;
+		 if (args.length > 2 && args[2] != null && args[2].length() > 0) {
+			 sheetsToRead = Arrays.asList((args[2].split(",")));
+		 }
 
 		try {
 			long startTime = System.currentTimeMillis();
@@ -369,13 +368,20 @@ public class ExcelProfileWriter {
 			startTime = System.currentTimeMillis();
 			ExcelProfileWriter xpw = new ExcelProfileWriter(confFile);
 			xpw.write(cList);
+			timeTaken = System.currentTimeMillis() - startTime;
 			logger.info("Write completed in " + (timeTaken / 1000) + "s");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
 	}
-
+	public static void test(String[] args) throws Exception {
+		final String fileName = "D:/sandbox/promat2605/data/z_srinivasan_06062016.xls";
+		final String confFile = "D:/sandbox/promat2605/promat/src/main/resources/a4print.conf";
+		final String sheetsToRead = "sree";
+		String[] newArgs = {confFile, fileName, sheetsToRead};
+		ExcelProfileWriter.profileWriter(newArgs);
+	}
 	/**
 	 * Loads the key and value pair from the given configuration file
 	 * 

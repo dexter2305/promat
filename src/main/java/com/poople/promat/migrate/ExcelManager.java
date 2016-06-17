@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
@@ -27,13 +29,15 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.util.IOUtils;
 
+import com.poople.promat.adapters.DTFormatter;
+import com.poople.promat.models.DataError;
+
 public class ExcelManager {
 
-	protected Workbook reportWrkBk;
 	private static final Log logger = LogFactory.getLog(ExcelManager.class);
 
-	protected void shutdown() throws Exception {
-		this.closeWorkBook(this.reportWrkBk);
+	protected void shutdown(Workbook wrkBk) throws Exception {
+		this.closeWorkBook(wrkBk);
 	}
 
 	protected File getFile(String strFile) throws Exception {
@@ -147,7 +151,7 @@ public class ExcelManager {
 		CellStyle cellStyle = createCellStyle(wrkBk, border, bgColor);
 		if ((fontSize != 0) || (fontColor != 0) || (fontBold != 0)) {
 
-			Font font = reportWrkBk.createFont();
+			Font font = wrkBk.createFont();
 			if (fontSize != 0) {
 				font.setFontHeightInPoints((short) fontSize);
 			}
@@ -343,4 +347,66 @@ public class ExcelManager {
 
 	}
 
+    public String getDateValueAsString(Cell cell, DateTimeFormatter dtf) throws DataError {
+    	logger.debug("ENTER - getDateValueAsString : " + cell);
+        if (cell == null) return null;
+        String dateValueAsString;
+        try {
+
+        	if(cell.getCellType() == Cell.CELL_TYPE_NUMERIC && cell.getDateCellValue() != null) 
+        	{
+	        	LocalDate dateValueAsLocalDate = DTFormatter.INSTANCE.getLocalDateFrom(cell.getDateCellValue());
+	        	logger.debug("dateValueAsLocalDate : " + dateValueAsLocalDate);
+	            dateValueAsString = dateValueAsLocalDate.format(dtf);
+        	}else {
+        		//FIXME this may be needed until we use excel for profile matching 
+        		String tempStr = cell.getStringCellValue(); 
+        		if(tempStr == null || tempStr.trim().isEmpty() || tempStr.contains("*")) 
+        		{
+	            	dateValueAsString = null;
+	            }else {
+		            dateValueAsString = tempStr;
+	        	}
+        	}
+        } catch (Exception ise) {
+            dateValueAsString = null;
+            throw new DataError("Invalid DOB :"+ ise.toString());
+        }
+        logger.debug("EXIT - getDateValueAsString : " + dateValueAsString);
+        return dateValueAsString;
+    }
+
+    public String getValueAsString(Cell cell) {
+    	logger.debug("ENTER - getValueAsString");
+        if (cell == null) return null;
+        if (cell.getCellType() != Cell.CELL_TYPE_STRING) {
+            cell.setCellType(Cell.CELL_TYPE_STRING);
+        }
+        String stringCellValue = cell.getStringCellValue();
+        if(stringCellValue.contains("Not Specified")) {
+        	stringCellValue.replaceAll("Not Specified", "");
+        }
+        //FIXME this may be needed until we use excel for profile matching 
+        if(stringCellValue.contains("*") || stringCellValue.trim().isEmpty()) {
+        	stringCellValue = null;
+        }
+        
+        logger.debug("EXIT - getValueAsString : " + stringCellValue);
+        return stringCellValue;
+    }
+
+    public Long getValueAsLong(Cell cell) {
+        String value = getValueAsString(cell);
+        if ( !(value == null || value.isEmpty())) {
+        	long id = 0L;
+	        try {
+	        	id = Long.parseLong(value);
+	        	return id;
+	        }catch(NumberFormatException nfe) {
+	        	//nfe.printStackTrace();
+	        	return null;
+	        }
+        }
+        return null;
+    }
 }

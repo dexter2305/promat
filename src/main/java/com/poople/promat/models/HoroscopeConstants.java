@@ -1,48 +1,71 @@
 package com.poople.promat.models;
 
+import java.util.HashSet;
+
 public interface HoroscopeConstants {
+	
     enum Star { 
     	ASVINI("ASVINI"),
         BARANI("BARANI"),
-        KARTHIGAI_1("KARTHIGAI"),
-        KARTHIGAI_234("KARTHIGAI"),
+        KARTHIGAI("KARTHIGAI"),
+        KARTHIGAI_1("KARTHIGAI",new int[]{1}),
+        KARTHIGAI_234("KARTHIGAI",new int[]{2,3,4}),
         ROHINI("ROHINI"),
-        MIRUGASEERIDAM_12("MIRUGASEERIDAM"),
-        MIRUGASEERIDAM_34("MIRUGASEERIDAM"),
+        MIRUGASEERIDAM("MIRUGASEERIDAM"),
+        MIRUGASEERIDAM_12("MIRUGASEERIDAM",new int[]{1,2}),
+        MIRUGASEERIDAM_34("MIRUGASEERIDAM",new int[]{3,4}),
         THIRUVATHIRAI("THIRUVATHIRAI"),
-        PUNARPOOSAM_123("PUNARPOOSAM"),
-        PUNARPOOSAM_4("PUNARPOOSAM"),
+        PUNARPOOSAM("PUNARPOOSAM"),
+        PUNARPOOSAM_23("PUNARPOOSAM",new int[]{2,3}),
+        PUNARPOOSAM_123("PUNARPOOSAM",new int[]{1,2,3}),
+        PUNARPOOSAM_4("PUNARPOOSAM",new int[]{4}),
         POOSAM("POOSAM"),
         AYILYAM("AYILYAM"),
         MAGAM("MAGAM"),
         POORAM("POORAM"),
-        UTHRAM_1("UTHRAM"),
-        UTHRAM_234("UTHRAM"),
+        UTHRAM("UTHRAM"),
+        UTHRAM_1("UTHRAM",new int[]{1}),
+        UTHRAM_234("UTHRAM",new int[]{2,3,4}),
+        UTHRAM_34("UTHRAM",new int[]{3,4}),
         ASTHAM("ASTHAM"),
-        CHITHRAI_12("CHITHRAI"),
-        CHITHRAI_34("CHITHRAI"),
+        CHITHRAI("CHITHRAI"),
+        CHITHRAI_12("CHITHRAI",new int[]{1,2}),
+        CHITHRAI_34("CHITHRAI",new int[]{3,4}),
         SWATHI("SWATHI"),
-        VISAGAM_123("VISAGAM"),
-        VISAGAM_4("VISAGAM"),
+        VISAGAM("VISAGAM"),
+        VISAGAM_123("VISAGAM",new int[]{1,2,3}),
+        VISAGAM_4("VISAGAM",new int[]{4}),
         ANUSHAM("ANUSHAM"),
         KETTAI("KETTAI"),
         MOOLAM("MOOLAM"),
         POORADAM("POORADAM"),
-        UTHRADAM_1("UTHRADAM"),
-        UTHRADAM_234("UTHRADAM"),
+        UTHRADAM("UTHRADAM"),
+        UTHRADAM_1("UTHRADAM",new int[]{1}),
+        UTHRADAM_234("UTHRADAM",new int[]{2,3,4}),
         THIRUVONAM("THIRUVONAM"),
-        AVITTAM_12("AVITTAM"),
-        AVITTAM_34("AVITTAM"),
+        AVITTAM("AVITTAM"),
+        AVITTAM_12("AVITTAM",new int[]{1,2}),
+        AVITTAM_34("AVITTAM",new int[]{3,4}),
         SATHAYAM("SATHAYAM"),
-        POORATTATHI_123("POORATTATHI"),
-        POORATTATHI_4("POORATTATHI"),
+        POORATTATHI("POORATTATHI"),
+        POORATTATHI_123("POORATTATHI",new int[]{1,2,3}),
+        POORATTATHI_4("POORATTATHI",new int[]{4}),
         UTHRATTATHI("UTHRATTATHI"),
         REVATHI("REVATHI");
     	private String name;
+    	private int[] padham = new int[]{1,2,3,4};
     	Star(String name) {
     		this.name = name;
     	}
-        @Override 
+    	Star(String name, int[] padham) {
+    		this.name = name;
+    		this.padham = padham;
+    	}
+    	
+        public int[] getPadham() {
+			return padham;
+		}
+		@Override 
         public String toString() {
             //only capitalize the first letter
             //String s = super.toString();
@@ -188,7 +211,37 @@ public interface HoroscopeConstants {
             return sevvai;
         }
     }
-	
+    public class MatchingStars{
+    	Match bestMatchStars;
+    	Match mediumMatchStars;
+		public Match getBestMatchStars() {
+			return bestMatchStars;
+		}
+		public void setBestMatchStars(Match bestMatchStars) {
+			this.bestMatchStars = bestMatchStars;
+		}
+		public Match getMediumMatchStars() {
+			return mediumMatchStars;
+		}
+		public void setMediumMatchStars(Match mediumMatchStars) {
+			this.mediumMatchStars = mediumMatchStars;
+		}
+    	
+    }
+    public class Match extends HashSet<HoroscopeConstants.Star>{
+		private static final long serialVersionUID = 1L;
+		String strength;
+
+		public String getStrength() {
+			return strength;
+		}
+
+		public void setStrength(String strength) {
+			this.strength = strength;
+		}
+    	
+    }
+
     public static void main(String[] args) throws DataError {
 		System.out.println(Sevvai.fromString("Two"));
 		System.out.println(RaahuKethu.fromString("CRK"));
@@ -198,3 +251,4 @@ public interface HoroscopeConstants {
 		System.out.println(Star.fromString("uthRaDam_1").toString());
 	}
 }
+
