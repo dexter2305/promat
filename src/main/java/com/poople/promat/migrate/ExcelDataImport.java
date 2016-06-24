@@ -36,6 +36,7 @@ public class ExcelDataImport {
 
 
     public static Collection<Candidate> importData(String fileName, List<String> sheetsToRead) throws IOException {
+    	logger.info("Importing file :" + fileName + " sheets :"+ sheetsToRead);
         final Collection<Candidate> candidates = new LinkedList<>();
         Set<Report> reports = new LinkedHashSet<>();
         FileInputStream fileInputStream = new FileInputStream(fileName);
@@ -415,7 +416,11 @@ public class ExcelDataImport {
         return (value != null);
     }
 
-    public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
+		ExcelDataImport.test(args);
+		//ExcelDataImport.dataImporter(args);
+	}
+	public static void dataImporter(String[] args) throws Exception {
         if (args == null || args.length < 1) {
             System.out.println("java com.poople.promat.ExcelDataImport <path-to-xls-file> <sheetname1,sheetname2,sheetname3>");
             System.out.println("if argument #2 is not provided, all sheets in the excel will be read.");
@@ -434,8 +439,15 @@ public class ExcelDataImport {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
+	}
+	public static void test(String[] args) throws Exception {
+		final String fileName = "D:/sandbox/web_crawler/conf/20062016/z_srinivasan_20062016.xls";
+		final String sheetsToRead = "sree";
+		//final String fileName = "D:/sandbox/web_crawler/conf/20062016/z_Lakshmi_20062016.xls";
+		//final String sheetsToRead = "Sheet1";
+		String[] newArgs = {fileName, sheetsToRead};
+		ExcelDataImport.dataImporter(newArgs);
+	}
     enum ExcelColumns {
     	USER_ID(0),
         EXTERNAL_USER_ID(1),
