@@ -190,6 +190,7 @@ public class ExcelDataImport {
         candidate.getEducations().addAll(educations);
         //Candidate::Occupation
         Occupation occupation = getOccupation(getValueAsString(row.getCell(ExcelColumns.OCCUPATION_TITLE.asInt())), getValueAsString(row.getCell(ExcelColumns.OCCUPATION_SALARY.asInt())), getValueAsString(row.getCell(ExcelColumns.OCCUPATION_PLACE.asInt())));
+        occupation.setCurrent(true);
         candidate.getOccupations().add(occupation);
         //Candidate::ExternalUserId
         candidate.setExternalUserId(getValueAsString(row.getCell(ExcelColumns.EXTERNAL_USER_ID.asInt())));

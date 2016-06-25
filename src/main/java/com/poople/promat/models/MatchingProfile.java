@@ -1,30 +1,48 @@
 package com.poople.promat.models;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import com.poople.promat.models.HoroscopeConstants.MatchType;
 import com.poople.promat.models.HoroscopeConstants.Star;
 
 public class MatchingProfile{
 	private static final long serialVersionUID = 1L;
+	private long id;
+	private String name;
 	private int strength;
 	private MatchType match = MatchType.BEST;
 	private Star star;
 	private String info = "";
 	private Candidate profile;
-	public MatchingProfile(String info) {
+	public MatchingProfile(Long id, String name, String info) {
 		super();
+		this.id = id;
+		this.name = name;
 		this.info = info;
 	}
-	public MatchingProfile(Star star, int strength, MatchType match, Candidate profile) {
+	public MatchingProfile(Long id, String name, Star star, int strength, MatchType match, Candidate profile) {
 		super();
+		this.id = id;
+		this.name = name;
 		this.star = star;
 		this.strength = strength;
 		this.match = match;
 		this.profile = profile;
 	}
 	
+	public long getId() {
+		return id;
+	}
+	public void setId(long id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
 	public Star getStar() {
 		return star;
 	}
@@ -67,10 +85,26 @@ public class MatchingProfile{
 			sev = h.getSevvai();
 		}
 		Integer age = null;
+		LocalDate d = null;
+		LocalTime t = null;
 		if(profile.getDob() != null) {
 			age = profile.getDob().age();
+			d = profile.getDob().getBirthdate();
+			t = profile.getDob().getBirthtime();
 		}
-		return "{Id:"+profile.getId()+", Kulam:"+profile.getKulam()+", Star:"+star +", Strength:"+strength+", Match:"+match+", Dob:"+profile.getDob()+", Age:"+age+", BirthPlace:"+birthPlace+", R/K:"+rk+", Sevvai:"+sev+", Height:"+(profile.getPhysique()!=null?profile.getPhysique().getHeight():"")+"}";
+		String workPlace = "";
+		String company = "";
+		if (profile.getOccupations() != null && !profile.getOccupations().isEmpty()){
+			Occupation currOcc = Occupation.getCurrentOccupation(profile.getOccupations());
+			if(currOcc !=null) {
+				workPlace = currOcc.getCompanyLocation();
+				company = currOcc.getCompany();
+			}
+		}
+		String strMat = id+","+name+","+profile.getId()+","+profile.getName()+","+profile.getKulam()+","+star +","+strength+","+match+","+d+","+t+","+age+","+birthPlace+","+rk+","+sev+","+(profile.getPhysique()!=null?profile.getPhysique().getHeight():"")+","+profile.getMaritalStatus()+","+company+","+workPlace;
+		
+		return strMat.replaceAll("null", "");
+		//return "{Id:"+profile.getId()+", Kulam:"+profile.getKulam()+", Star:"+star +", Strength:"+strength+", Match:"+match+", Dob:"+profile.getDob()+", Age:"+age+", BirthPlace:"+birthPlace+", R/K:"+rk+", Sevvai:"+sev+", Height:"+(profile.getPhysique()!=null?profile.getPhysique().getHeight():"")+"}";
 	}
 	
 	

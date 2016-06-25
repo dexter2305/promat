@@ -3,7 +3,6 @@ package com.poople.promat.migrate;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,15 +12,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.hssf.util.CellReference;
-import org.apache.poi.util.SystemOutLogger;
 
 import com.poople.promat.models.Candidate;
 import com.poople.promat.models.Candidate.Gender;
@@ -156,16 +151,11 @@ public class MatchingEngine {
 		Optional<Candidate> profile = profilesToMatchFor.stream().filter((cand) -> (cand.getId() == id)).findFirst();
 
 		Set<MatchingProfile> starMatches = new HashSet<MatchingProfile>();
-		logger.info("Profile found status : "+profile.isPresent());
+		logger.info("Profile "+ id+" found status : "+profile.isPresent());
+		
 		if(profile.isPresent()) {
 			Candidate matchForCandidate = profile.get();
-			String kulam = matchForCandidate.getKulam();
-			String ms = matchForCandidate.getMaritalStatus();
-			Dob dob = matchForCandidate.getDob();
-			Physique p = matchForCandidate.getPhysique();
-			Horoscope h = matchForCandidate.getHoroscope();
-			//Set<MatchingProfiles> starMatches = profilesToMatchAgainst.stream().filter((matchAgainstCandidate) -> (matches.apply(matchForCandidate, matchAgainstCandidate))).map((matchAgainstCandidate) -> {return new MatchingProfiles(0, null, null);}).collect(Collectors.toSet());
-			
+			String name = matchForCandidate.getName();
 			profilesToMatchAgainst.stream().forEach((matchAgainstCandidate) -> {
 				MatchingProfile matchResult = match(matchForCandidate,matchAgainstCandidate);
 				if(matchResult != null) {
@@ -177,11 +167,12 @@ public class MatchingEngine {
 				}
 			});
 			System.out.println(matchForCandidate);
+			System.out.println("Id,Name,MatchingId,MatchingName,Kulam,Star,Strength,MatchType,Dob,Tob,Age,BirthPlace,RahuKethu,Sevvai,Height,MaritalStatus,Company,WorkPlace");
+			starMatches.forEach(r->System.out.println(r));
+			
 		}else{
-			starMatches.add(new MatchingProfile("Id "+ id +"not found in excel"));
+			starMatches.add(new MatchingProfile(id,"","Id "+ id +"not found in excel"));
 		}
-		
-		starMatches.forEach(r->System.out.println(r));
 		
 		logger.info("matchProfile(long userId) - EXIT : Match completed for id " + id + ". # of matches found." +starMatches.size());
 		return starMatches;
@@ -251,7 +242,7 @@ public class MatchingEngine {
 					if(!evaluateCondition(mfAge, maAge, MaleAgeCondForFemale)) {
 						return null;
 					} else {
-						logger.info(mfAge + " vs " + maAge);
+						logger.debug(mfAge + " vs " + maAge);
 					}
 					
 				}
@@ -264,9 +255,6 @@ public class MatchingEngine {
 					}
 					
 				}
-			}
-			if(MaleHtCondForFemale != "") {
-				
 			}
 		}else {
 			if(mfAge != null && mfAge !=0 && maAge!=null && maAge != 0) {
@@ -332,22 +320,22 @@ public class MatchingEngine {
 			}
 		}
 		
-		return new MatchingProfile(mas, matStrength, matScore, matchAgainstCandidate);
+		return new MatchingProfile(matchForCandidate.getId(), matchForCandidate.getName(), mas, matStrength, matScore, matchAgainstCandidate);
 	}
-	private boolean evaluateCondition(Integer mfAge , Integer maAge, String operator){
+	private boolean evaluateCondition(Integer mfAttr , Integer maAttr, String operator){
 		boolean result = false;
 		switch(operator) {
 		case ">":
-			return (mfAge > maAge);
+			return (mfAttr > maAttr);
 		case "<":
-			return (mfAge < maAge);
+			return (mfAttr < maAttr);
 		case ">=":
-			return (mfAge >= maAge);
+			return (mfAttr >= maAttr);
 		case "<=":
-			return (mfAge <= maAge);
+			return (mfAttr <= maAttr);
 		case "=":
 		case "==":
-			return (mfAge == maAge);
+			return (mfAttr == maAttr);
 			
 		}
 		return result ;

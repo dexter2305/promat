@@ -2,17 +2,10 @@ package com.poople.promat.models;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.poople.promat.models.HoroscopeConstants.MatchingStar;
-import com.poople.promat.models.HoroscopeConstants.MatchType;
-import com.poople.promat.models.HoroscopeConstants.MatchingStars;
-import com.poople.promat.models.HoroscopeConstants.Star;
 
 public interface HoroscopeConstants {
 
@@ -66,22 +59,28 @@ public interface HoroscopeConstants {
 		REVATHI("REVATHI");
 		private String name;
 		private int[] padham = new int[]{1,2,3,4};
+		private String padhamAsString = "1234";
 		Star(String name) {
 			this.name = name;
 		}
 		Star(String name, int[] padham) {
 			this.name = name;
 			this.padham = padham;
+			this.padhamAsString = Stream.of(padham).map(p -> String.valueOf(p)).reduce((p,n) -> (p + "" +n)).get();
 		}
 
 		public int[] getPadham() {
 			return padham;
 		}
+		public String getPadhamAsString() {
+			return padhamAsString;
+		}
 		@Override 
 		public String toString() {
 			//only capitalize the first letter
-			//String s = super.toString();
-			return name.substring(0, 1) + name.substring(1).toLowerCase();
+			String s = super.toString();
+			//return name.substring(0, 1) + name.substring(1).toLowerCase();
+			return s.substring(0, 1) + s.substring(1).toLowerCase();
 
 		}
 		public static Star fromString(String s) throws DataError {
@@ -244,7 +243,15 @@ public interface HoroscopeConstants {
 			return matchStars;
 		}
 		public MatchingStar getMatchingStar(Star inputStar) {
-			Optional<MatchingStar> matching = matchStars.stream().filter(ms -> (ms.getStar().equals(inputStar))).findFirst();
+			Optional<MatchingStar> matching = matchStars.stream().filter(ms -> {
+				if(ms.getStar().name.equals(inputStar.name)) {
+					if(ms.getStar().getPadhamAsString().contains(inputStar.getPadhamAsString())) {
+						return true;
+					}
+				}
+				return false;
+				}).findFirst();
+			
 			return (matching.isPresent())?matching.get():null;
 		}
 	}
