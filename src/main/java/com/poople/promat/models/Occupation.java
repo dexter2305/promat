@@ -2,9 +2,6 @@ package com.poople.promat.models;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.poople.promat.models.HoroscopeConstants.MatchType;
 
 public class Occupation {
     private String company;

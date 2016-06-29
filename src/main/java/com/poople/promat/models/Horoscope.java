@@ -1,10 +1,8 @@
 package com.poople.promat.models;
 
-import java.awt.Image;
-
-import com.poople.promat.models.HoroscopeConstants.Star;
 import com.poople.promat.models.HoroscopeConstants.Planet;
 import com.poople.promat.models.HoroscopeConstants.Raasi;
+import com.poople.promat.models.HoroscopeConstants.Star;
 
 
 

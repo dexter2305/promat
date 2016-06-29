@@ -274,7 +274,6 @@ public interface HoroscopeConstants {
 		}
 	}
 	public class MatchingStar {
-		private static final long serialVersionUID = 1L;
 		int strength;
 		MatchType match = MatchType.BEST;
 		Star star ;

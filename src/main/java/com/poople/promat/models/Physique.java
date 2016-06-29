@@ -3,8 +3,6 @@ package com.poople.promat.models;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.poople.promat.migrate.ExcelDataImport;
-
 public class Physique {
 	private static final Log logger = LogFactory.getLog(Physique.class);
     private Long heightInCm;

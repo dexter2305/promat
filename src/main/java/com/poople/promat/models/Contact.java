@@ -1,9 +1,7 @@
 package com.poople.promat.models;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 
 public class Contact {
 

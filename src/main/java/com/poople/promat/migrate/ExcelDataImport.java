@@ -214,7 +214,7 @@ public class ExcelDataImport {
     }
 
     private static Collection<Note> getNotes(String[] notes) {
-        if (notes == null) return Collections.EMPTY_SET;
+        if (notes == null) return Collections.emptySet();
         List<Note> noteList = Stream.of(notes)
                 .parallel()
                 .map(s -> {
@@ -252,7 +252,7 @@ public class ExcelDataImport {
 
 
     private static Collection<Education> getEducations(Cell cell) {
-        if (null == cell) return Collections.EMPTY_SET;
+        if (null == cell) return Collections.emptySet();
         Collection<Education> educations;
         String value = getValueAsString(cell);
         if (value != null && !value.isEmpty()) {
@@ -264,13 +264,13 @@ public class ExcelDataImport {
                 educations.add(education);
             }
         } else {
-            educations = Collections.EMPTY_SET;
+            educations = Collections.emptySet();
         }
         return educations;
     }
 
     private static Collection<String> getPhoneNumbers(Cell[] cells) {
-        if (cells == null || cells.length == 0) return Collections.EMPTY_LIST;
+        if (cells == null || cells.length == 0) return Collections.emptyList();
         Collection<String> phoneNumbers = Stream.of(cells)
                 .map(cell -> getValueAsString(cell))
                 .filter(s -> s != null && !s.isEmpty())
