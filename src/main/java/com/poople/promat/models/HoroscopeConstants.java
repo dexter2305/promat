@@ -1,9 +1,11 @@
 package com.poople.promat.models;
 
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -75,12 +77,19 @@ public interface HoroscopeConstants {
 		public String getPadhamAsString() {
 			return padhamAsString;
 		}
+		
 		@Override 
 		public String toString() {
 			//only capitalize the first letter
 			String s = super.toString();
 			//return name.substring(0, 1) + name.substring(1).toLowerCase();
 			return s.substring(0, 1) + s.substring(1).toLowerCase();
+
+		}
+		public String toWholeString() {
+			//only capitalize the first letter
+			String s = String.valueOf(this);
+			return s.substring(s.lastIndexOf(".")+1);
 
 		}
 		public static Star fromString(String s) throws DataError {
@@ -223,21 +232,22 @@ public interface HoroscopeConstants {
 		}
 	}
 	public class MatchingStars {
-		HashSet<MatchingStar> matchStars;
+		TreeSet<MatchingStar> matchStars;
 		Star star;
 		String rasi;
-		public MatchingStars(Star star, String rasi, HashSet<MatchingStar> bestMatchStars, HashSet<MatchingStar> mediumMatchStars) {
+		public MatchingStars(Star star, String rasi, TreeSet<MatchingStar> bestMatchStars, TreeSet<MatchingStar> mediumMatchStars) {
 			super();
 			this.star = star;
 			this.rasi = rasi;
-			this.matchStars = bestMatchStars;
+			this.matchStars = new TreeSet<MatchingStar>(new CompareMatchingStars());
+			matchStars.addAll(bestMatchStars);
 			matchStars.addAll(mediumMatchStars);
 		}
 		public Set<MatchingStar> getBestMatchStars() {
-			 return matchStars.stream().filter(ms -> (ms.getMatch()==MatchType.BEST)).collect(Collectors.toSet());
+			 return matchStars.stream().filter(ms -> (ms.getMatch()==MatchType.BEST)).sorted(new CompareMatchingStars()).collect(Collectors.toSet());
 		}
 		public Set<MatchingStar> getMediumMatchStars() {
-			return matchStars.stream().filter(ms -> (ms.getMatch()==MatchType.MEDIUM)).collect(Collectors.toSet());
+			return matchStars.stream().filter(ms -> (ms.getMatch()==MatchType.MEDIUM)).sorted(new CompareMatchingStars()).collect(Collectors.toSet());
 		}
 		public Set<MatchingStar> getMatchingStars() {
 			return matchStars;
@@ -276,8 +286,8 @@ public interface HoroscopeConstants {
 			this.star = star;
 		}
 
-		public static HashSet<MatchingStar> getMatchingStars(int strength, MatchType match, String stars) {
-			HashSet<MatchingStar> starSet = new HashSet<MatchingStar>();
+		public static TreeSet<MatchingStar> getMatchingStars(int strength, MatchType match, String stars) {
+			TreeSet<MatchingStar> starSet = new TreeSet<MatchingStar>(new CompareMatchingStars());
 			
 			stars = stars.trim();
 			stars.replaceAll("[\n\r]", "");
@@ -339,7 +349,7 @@ public interface HoroscopeConstants {
             }
         };
 }
-	public static final class BoysMatching extends HashMap<Star, MatchingStars>{
+	public static final class BoysMatching extends TreeMap<Star, MatchingStars>{
 		private static final long serialVersionUID = 1L;
 		private BoysMatching() {		
 			this.put(Star.ASVINI,new MatchingStars(Star.ASVINI,"Mesha",MatchingStar.getMatchingStars(12, MatchType.BEST, "BARANI,KARTHIGAI,MIRUGASEERIDAM,PUNARPOOSAM,POOSAM,POORAM,UTHRAM,CHITHRAI,VISAGAM,UTHRADAM_234,AVITTAM,POORATTATHI_123"),MatchingStar.getMatchingStars(7, MatchType.MEDIUM, "ROHINI,THIRUVATHIRAI,ANUSHAM,POORADAM,UTHRADAM_1,SATHAYAM,AVITTAM_34 ")));
@@ -386,7 +396,7 @@ public interface HoroscopeConstants {
 	    	return BoysMatchingHolder.INSTANCE;   
 		}
 	}
-	public static class GirlsMatching extends HashMap<Star, MatchingStars>{
+	public static class GirlsMatching extends TreeMap<Star, MatchingStars>{
 		private static final long serialVersionUID = 1L;
 
 		private GirlsMatching() {	
@@ -444,5 +454,53 @@ public interface HoroscopeConstants {
 		System.out.println(Star.fromString("PooRaDam"));
 		System.out.println(Star.fromString("uthRaDam_1").toString());
 	}
+	public class CompareMatchingStars implements Comparator <MatchingStar> {  
+	    @Override  
+	    public int compare(MatchingStar arg0, MatchingStar arg1) {  
+	    	if (arg0 == null || arg0.getStar() == null){
+	    		return 1;
+	    	}
+	    	if (arg1 == null || arg1.getStar() == null ){
+	    		return -1;
+	    	}
+	    	
+	    	String param1 = arg0.getStar().name + arg0.getStar().padhamAsString;
+	    	String param2 = arg1.getStar().name + arg1.getStar().padhamAsString;
+	    	//System.out.println("CompareStars - " +param1 + " vs " + param2 +": " + param1.compareTo(param2));
+	    	return param1.compareTo(param2) ;
+	    }  
+	}  	
+	public class CompareStar implements Comparator <Star> {  
+	    @Override  
+	    public int compare(Star arg0, Star arg1) {  
+	    	if (arg0 == null){
+	    		return 1;
+	    	}
+	    	if (arg1 == null){
+	    		return -1;
+	    	}
+	    	
+	    	String param1 = arg0.name + arg0.padhamAsString;
+	    	String param2 = arg1.name + arg1.padhamAsString;
+	    	//System.out.println("CompareStars - " +param1 + " vs " + param2 +": " + param1.compareTo(param2));
+	    	return param1.compareTo(param2) ;
+	    }  
+	} 
+	public class CompareProfilesByStars implements Comparator <MatchingProfile> {  
+	    @Override  
+	    public int compare(MatchingProfile arg0, MatchingProfile arg1) {  
+	    	if (arg0.getProfile() == null || arg0.getProfile().getHoroscope() == null){
+	    		return 1;
+	    	}
+	    	if (arg1.getProfile() == null || arg1.getProfile().getHoroscope() == null ){
+	    		return -1;
+	    	}
+	    	String param1 = arg0.getProfile().getHoroscope().getStar().name + arg0.getProfile().getHoroscope().getStar().padhamAsString;
+	    	String param2 = arg1.getProfile().getHoroscope().getStar().name + arg1.getProfile().getHoroscope().getStar().padhamAsString;
+	    	//System.out.println("CompareProfilesByStars - " +param1 + " vs " + param2 +": " + param1.compareTo(param2));
+	    	
+	    	return param1.compareTo(param2) ;
+	    }  
+	}  
 }
 

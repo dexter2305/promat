@@ -1,20 +1,30 @@
 package com.poople.promat.migrate;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
 import com.poople.promat.models.HoroscopeConstants;
+import com.poople.promat.models.MatchingProfile;
 import com.poople.promat.models.HoroscopeConstants.MatchingStar;
 import com.poople.promat.models.HoroscopeConstants.MatchType;
 import com.poople.promat.models.HoroscopeConstants.MatchingStars;
 import com.poople.promat.models.HoroscopeConstants.Star;
+import com.poople.promat.models.HoroscopeConstants.CompareMatchingStars;
+import com.poople.promat.models.HoroscopeConstants.CompareStar;
 
 public class MatchingStarsInitializer {
 	private String excelPrintTemplateFile;
@@ -43,7 +53,7 @@ public class MatchingStarsInitializer {
 		logger.info("ENTER - readBoyMatchingStars()");
 		Sheet sheet = wrkBk.getSheet("b2g");
 		// read boy to girl matching stars
-		Map<Star, MatchingStars> boysMatching = new HashMap<Star, MatchingStars>();
+		Map<Star, MatchingStars> boysMatching = new TreeMap<Star, MatchingStars>(new CompareStar());
 		System.out.println("Map<Star, MatchingStars> boysMatching = new HashMap<Star, MatchingStars>();");
 		for (int i = 2; i <= 72; i = i + 2) {
 			// System.out.println("");
@@ -91,7 +101,7 @@ public class MatchingStarsInitializer {
 	private Map<Star, MatchingStars> readGirlMatchingStars() throws Exception {
 		logger.info("ENTER - readGirlMatchingStars()");
 		Sheet sheet = wrkBk.getSheet("g2b");
-		Map<Star, MatchingStars> girlsMatching = new HashMap<Star, MatchingStars>();
+		Map<Star, MatchingStars> girlsMatching = new TreeMap<Star, MatchingStars>(new CompareStar());
 		System.out.println("Map<Star, MatchingStars> girlsMatching = new HashMap<Star, MatchingStars>();");
 		// read girl to boy matching stars
 		for (int i = 2; i <= 72; i = i + 2) {
@@ -148,8 +158,46 @@ public class MatchingStarsInitializer {
 	public static void test(String[] args) throws Exception {
 		final String fileName = "D:/sandbox/promat2605/promat/src/main/resources/star_matching.xls";
 		MatchingStarsInitializer xpw = new MatchingStarsInitializer(fileName);
-		xpw.readBoyMatchingStars();
-		xpw.readGirlMatchingStars();
+		
+		
+		xpw.writeToExcel("b2g.xls", xpw.readBoyMatchingStars());
+		xpw.writeToExcel("g2b.xls", xpw.readGirlMatchingStars());
 	}
+	public void writeToExcel(String outFileName, Map<Star,MatchingStars> resultMap) throws Exception {
+		
+        System.out.println("writeToExcel - ENTER : Writing output to csv with file name: " +outFileName);
+		ExcelManager xl = new ExcelManager();
+		Workbook w = xl.createWorkBook();
+		
+		Sheet s = w.createSheet(outFileName.substring(0, outFileName.indexOf(".")));
 
+		Row row = s.createRow(s.getLastRowNum());
+		List<String> header =Arrays.asList("Star" , "Match Type", "Match Strength" , "Matching Stars");
+		xl.writeStringArraytoRow(row, header);
+
+		CellReference fCf = new CellReference(row.getRowNum(), row.getFirstCellNum());
+		CellReference lCf = new CellReference(row.getRowNum(), row.getLastCellNum());
+		
+		s.setAutoFilter(CellRangeAddress.valueOf(fCf.formatAsString() + ":" + lCf.formatAsString()));
+		resultMap.forEach((star,matchedStar) -> {
+			Row rowdata1 = s.createRow(s.getLastRowNum()+1);
+			rowdata1.createCell(0).setCellValue(String.valueOf(star));
+			rowdata1.createCell(1).setCellValue("BEST");
+			rowdata1.createCell(2).setCellValue(matchedStar.getBestMatchStars().iterator().next().getStrength());
+			rowdata1.createCell(3).setCellValue(matchedStar.getBestMatchStars().stream().map(bs -> bs.getStar().toWholeString()).sorted().collect(Collectors.joining(", ")));
+			
+			Row rowdata2 = s.createRow(s.getLastRowNum()+1);
+			rowdata2.createCell(0).setCellValue("");
+			s.addMergedRegion(new CellRangeAddress(rowdata1.getRowNum(),rowdata2.getRowNum(),0,0));
+			rowdata2.createCell(1).setCellValue("MEDIUM");
+			rowdata2.createCell(2).setCellValue(matchedStar.getMediumMatchStars().iterator().next().getStrength());
+			rowdata2.createCell(3).setCellValue(matchedStar.getMediumMatchStars().stream().map(bs -> bs.getStar().toWholeString()).sorted().collect(Collectors.joining(", ")));
+		});
+		// Auto size the column widths
+		for(int columnIndex = 0; columnIndex < 10; columnIndex++) {
+		     s.autoSizeColumn(columnIndex);
+		}
+		xl.writeWorkBookToFile(w, outFileName);
+		xl.closeWorkBook(w);
+	}
 }

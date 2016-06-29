@@ -3,20 +3,29 @@ package com.poople.promat.migrate;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.poople.promat.models.Candidate;
 import com.poople.promat.models.Candidate.Gender;
@@ -24,6 +33,7 @@ import com.poople.promat.models.Dob;
 import com.poople.promat.models.Horoscope;
 import com.poople.promat.models.HoroscopeConstants;
 import com.poople.promat.models.HoroscopeConstants.BoysMatching;
+import com.poople.promat.models.HoroscopeConstants.CompareProfilesByStars;
 import com.poople.promat.models.HoroscopeConstants.GirlsMatching;
 import com.poople.promat.models.HoroscopeConstants.MatchType;
 import com.poople.promat.models.HoroscopeConstants.MatchingStar;
@@ -31,23 +41,9 @@ import com.poople.promat.models.MatchingProfile;
 import com.poople.promat.models.Physique;
 
 public class MatchingEngine {
-	private static final Log logger = LogFactory.getLog(ExcelProfileWriter.class);
+	private static final Log logger = LogFactory.getLog(MatchingEngine.class);
 	private String femalesExcelFileName;
 	private String malesExcelFileName;
-	private CellReference userIdCol;
-	private CellReference nameCol;
-	private CellReference htCol;
-	private CellReference kulamCol;
-	private CellReference starCol;
-	private CellReference padhamCol;
-	private CellReference dobCol;
-	private CellReference timeCol;
-	private CellReference ageCol;
-	private CellReference birthplaceCol;
-	private CellReference rasiCol;
-	private CellReference rahukethuCol;
-	private CellReference sevvaiCol;
-	private CellReference maritalStatusCol;
 	private String femalesExcelFileSheetNames;
 	private String malesExcelFileSheetNames;
 	
@@ -64,8 +60,8 @@ public class MatchingEngine {
 	private String FemaleHtCondForMale;
 	private String MaleHtCondForFemale;
 	private Gender matchForGender;
-	private static List<String> cellRefs = Arrays.asList("userid", "sex", "name", "star", "age", "dob",
-			"time", "birthplace", "kulam", "padham", "rasi", "lagnam", "rk", "sev", "ht", "marital.status");
+	private String outFileName;
+	private String importConfig;
 	public MatchingEngine(String strConfigFileName) throws Exception {
 		super();
 		init(strConfigFileName);
@@ -79,23 +75,17 @@ public class MatchingEngine {
 		this.malesExcelFileName = configProps.getProperty("males.excel.profile");
 		this.malesExcelFileSheetNames = configProps.getProperty("males.excel.profile.sheet.names");
 		this.femalesExcelFileSheetNames = configProps.getProperty("females.excel.profile.sheet.names");
-		// Validate if all required cell references are present in input config
-		List<String> notPresentList = cellRefs.stream().filter((propName) -> (!configProps.containsKey(propName)))
-				.collect(Collectors.toList());
-		if (notPresentList != null && notPresentList.size() > 0) {
-			throw new Exception("One or more config values are not persent for following properties : "
-					+ notPresentList.toString());
-		}
-
 		
-
+		this.importConfig = configProps.getProperty("profile.import.config.file");
+		Properties importConfigProps = new Properties();
+		configProps.load(new FileInputStream(importConfig));
 		this.matchForGender = Gender.valueOf(configProps.getProperty("match.gender"));
 		if(matchForGender == Gender.MALE) {
-			profilesToMatchFor = importCandidates(malesExcelFileName, Arrays.asList((malesExcelFileSheetNames.split(","))));
-			profilesToMatchAgainst = importCandidates(femalesExcelFileName, Arrays.asList((femalesExcelFileSheetNames.split(","))));
+			profilesToMatchFor = importCandidates(importConfigProps, malesExcelFileName, Arrays.asList((malesExcelFileSheetNames.split(","))));
+			profilesToMatchAgainst = importCandidates(importConfigProps, femalesExcelFileName, Arrays.asList((femalesExcelFileSheetNames.split(","))));
 		}else {
-			profilesToMatchFor = importCandidates(femalesExcelFileName, Arrays.asList((femalesExcelFileSheetNames.split(","))));
-			profilesToMatchAgainst = importCandidates(malesExcelFileName, Arrays.asList((malesExcelFileSheetNames.split(","))));
+			profilesToMatchFor = importCandidates(importConfigProps, femalesExcelFileName, Arrays.asList((femalesExcelFileSheetNames.split(","))));
+			profilesToMatchAgainst = importCandidates(importConfigProps, malesExcelFileName, Arrays.asList((malesExcelFileSheetNames.split(","))));
 		}
 		String strIds = configProps.getProperty("find.match.for.ids");
 		this.matchForIds = Arrays.asList((strIds.split(","))).stream().map(Long::parseLong).collect(Collectors.toList());
@@ -113,9 +103,9 @@ public class MatchingEngine {
 	}
 
 
-	private Collection<Candidate> importCandidates(String excelFileName, List<String> excelFileSheetNames) throws IOException {
+	private Collection<Candidate> importCandidates(Properties importConfigProps, String excelFileName, List<String> excelFileSheetNames) throws Exception {
 		long startTime = System.currentTimeMillis();
-		Collection<Candidate> cList = ExcelDataImport.importData(excelFileName, excelFileSheetNames);
+		Collection<Candidate> cList = ExcelDataImport.importData(importConfigProps, excelFileName, excelFileSheetNames);
 		long timeTaken = System.currentTimeMillis() - startTime;
 		logger.info("Importing "+ malesExcelFileName + " profile completed in " + (timeTaken / 1000) + "s");
 		return cList;
@@ -126,22 +116,71 @@ public class MatchingEngine {
 	}
 	public static void profileMatcher(String[] args) throws Exception {
 
-		 if (args == null || args.length != 1) {
-			 System.out.println("java com.poople.promat.migrate.MatchingEngine <path-to-match-conf-file>");
-			 return;
-		 }
-		 final String confFile = args[0];
-		 MatchingEngine me = new MatchingEngine(confFile);
-		 me.matchAllProfiles();
+		if (args == null || args.length != 1) {
+			System.out.println("java com.poople.promat.migrate.MatchingEngine <path-to-match-conf-file>");
+			return;
+		}
+		final String confFile = args[0];
+		MatchingEngine me = new MatchingEngine(confFile);
+		Map<Long, Set<MatchingProfile>> resultMap = me.matchAllProfiles();
+		me.writeToExcel(resultMap);
 	}
-	public Map<Long, Set<MatchingProfile>> matchAllProfiles(){
-		long startTime = System.currentTimeMillis();
-		Map<Long, Set<MatchingProfile>> matchResults = new HashMap<Long, Set<MatchingProfile>>();
+	public void writeToExcel(Map<Long, Set<MatchingProfile>> resultMap) throws Exception {
+		outFileName = "MatchResults_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("ddMMyyhhmm")) + ".xls";
+        System.out.println("writeToExcel - ENTER : Writing output to csv with file name: " +outFileName);
+		ExcelManager xl = new ExcelManager();
+		Workbook w = xl.createWorkBook();
 		
-		matchForIds.forEach(id -> matchResults.put(id, matchProfile(id)));
+		Sheet s = w.createSheet("results");
+
+		Row row = s.createRow(s.getLastRowNum());
+		xl.writeStringArraytoRow(row, MatchingProfile.getListFormat());
+
+//		resultMap.keySet().forEach((id) -> {
+//			//check if id is valid
+//			Optional<Candidate> matchForCandidate = profilesToMatchFor.stream().filter((cand) -> (cand.getId() == id)).findFirst();
+//			logger.info("Profile "+ id+" found status : "+matchForCandidate.isPresent());
+//			
+//			if(matchForCandidate.isPresent()) {
+//				Row p = s.createRow(s.getLastRowNum()+1);
+//				//FIXME This is dummy for easier comparision
+//				xl.writeStringArraytoRow(p, (new MatchingProfile(id, "", null,0,null, matchForCandidate.get()).toArray()));
+//			}
+//			//s.setRowBreak(s.getLastRowNum());
+//		});
+//		Row row = s.createRow(s.getLastRowNum()+1);
+//		xl.writeStringArraytoRow(row, MatchingProfile.getArrayFormat());
+
+		CellReference fCf = new CellReference(row.getRowNum(), row.getFirstCellNum());
+		CellReference lCf = new CellReference(row.getRowNum(), row.getLastCellNum());
+		
+		s.setAutoFilter(CellRangeAddress.valueOf(fCf.formatAsString() + ":" + lCf.formatAsString()));
+		resultMap.forEach((id,matchedSet) -> {
+			matchedSet.forEach(m -> {
+				Row r = s.createRow(s.getLastRowNum()+1);
+
+				System.out.println();
+				xl.writeStringArraytoRow(r, m.toList());
+			});
+			//s.setRowBreak(s.getLastRowNum());
+		});
+		// Auto size the column widths
+		for(int columnIndex = 0; columnIndex < 10; columnIndex++) {
+		     s.autoSizeColumn(columnIndex);
+		}
+		xl.writeWorkBookToFile(w, outFileName);
+		xl.closeWorkBook(w);
+	}
+	public Map<Long, Set<MatchingProfile>> matchAllProfiles() throws IOException{
+		long startTime = System.currentTimeMillis();
+		Map<Long, Set<MatchingProfile>> matchResults = new TreeMap<Long, Set<MatchingProfile>>();
+		
+		matchForIds.forEach(id -> {
+			
+			matchResults.put(id, matchProfile(id));});
 		long timeTaken = System.currentTimeMillis() - startTime;
 		logger.info("Match completed in " + (timeTaken / 1000) + "s");
-		
+
 		return matchResults;
 
 	}
@@ -150,16 +189,17 @@ public class MatchingEngine {
 		//check if id is valid
 		Optional<Candidate> profile = profilesToMatchFor.stream().filter((cand) -> (cand.getId() == id)).findFirst();
 
-		Set<MatchingProfile> starMatches = new HashSet<MatchingProfile>();
+		Set<MatchingProfile> starMatches = new TreeSet<MatchingProfile>(new CompareProfilesByStars());
+		
 		logger.info("Profile "+ id+" found status : "+profile.isPresent());
 		
 		if(profile.isPresent()) {
 			Candidate matchForCandidate = profile.get();
-			String name = matchForCandidate.getName();
+			
 			profilesToMatchAgainst.stream().forEach((matchAgainstCandidate) -> {
 				MatchingProfile matchResult = match(matchForCandidate,matchAgainstCandidate);
 				if(matchResult != null) {
-					logger.info("Found MATCH for profile with Id :"+ matchAgainstCandidate.getId() + " with star "+ matchResult.getStar());
+					logger.debug("Found MATCH for profile with Id :"+ matchAgainstCandidate.getId() + " with star "+ matchResult.getStar());
 					starMatches.add(matchResult);
 				}
 				else {
@@ -167,11 +207,11 @@ public class MatchingEngine {
 				}
 			});
 			System.out.println(matchForCandidate);
-			System.out.println("Id,Name,MatchingId,MatchingName,Kulam,Star,Strength,MatchType,Dob,Tob,Age,BirthPlace,RahuKethu,Sevvai,Height,MaritalStatus,Company,WorkPlace");
+			System.out.println(MatchingProfile.getListFormat().stream().collect(Collectors.joining("|")));
 			starMatches.forEach(r->System.out.println(r));
 			
 		}else{
-			starMatches.add(new MatchingProfile(id,"","Id "+ id +"not found in excel"));
+			starMatches.add(new MatchingProfile(id,"","Id '"+ id +"' not found in excel"));
 		}
 		
 		logger.info("matchProfile(long userId) - EXIT : Match completed for id " + id + ". # of matches found." +starMatches.size());
@@ -227,59 +267,9 @@ public class MatchingEngine {
 		if(maPhy != null ) {
 			maHt = maPhy.getHeight();
 		}
-		if(doNotMatchSameKulam) {			
-			logger.debug(mfKulam + " vs " + maKulam);
-			if(mfKulam != null && !mfKulam.isEmpty() && maKulam != null && !mfKulam.isEmpty()){				
-				if(maKulam.equalsIgnoreCase(mfKulam)){
-					return null;
-				}
-			}
-		}
-		if(this.matchForGender == Gender.MALE) {
-			if(mfAge != null && mfAge !=0 && maAge!=null && maAge != 0) {
-				logger.debug(mfAge + " vs " + maAge);
-				if(MaleAgeCondForFemale != "") {
-					if(!evaluateCondition(mfAge, maAge, MaleAgeCondForFemale)) {
-						return null;
-					} else {
-						logger.debug(mfAge + " vs " + maAge);
-					}
-					
-				}
-			}
-			if(mfHt != null && mfHt !=0 && maHt!=null && maHt != 0) {
-				logger.debug(mfHt + " vs " + maHt);
-				if(MaleHtCondForFemale != "") {
-					if(!evaluateCondition(mfHt.intValue(), maHt.intValue(), MaleHtCondForFemale)) {
-						return null;
-					}
-					
-				}
-			}
-		}else {
-			if(mfAge != null && mfAge !=0 && maAge!=null && maAge != 0) {
-				logger.debug(mfAge + " vs " + maAge);
-				if(FemaleAgeCondForMale != "") {
-					if(!evaluateCondition(mfAge, maAge, FemaleAgeCondForMale)) {
-						return null;
-					}
-					
-				}
-			}
-			if(mfHt != null && mfHt !=0 && maHt!=null && maHt != 0) {
-				logger.debug(mfHt + " vs " + maHt);
-				if(FemaleHtCondForMale != "") {
-					if(!evaluateCondition(mfHt.intValue(), maHt.intValue(), FemaleHtCondForMale)) {
-						return null;
-					}
-					
-				}
-			}
-		}
-		
 		if(matchStar) {	
 			if( mfs !=null && mas !=null) {					
-				logger.debug(mfs + " vs " + mas);
+				logger.info(mfs + " vs " + mas);
 				MatchingStar matchResult = null;
 				if(this.matchForGender == Gender.MALE) {
 					matchResult = BoysMatching.getInstance().get(mfs).getMatchingStar(mas);
@@ -297,8 +287,59 @@ public class MatchingEngine {
 				return null;
 			}
 		}
+		if(doNotMatchSameKulam) {			
+			logger.info(mfKulam + " vs " + maKulam);
+			if(mfKulam != null && !mfKulam.isEmpty() && maKulam != null && !mfKulam.isEmpty()){				
+				if(maKulam.equalsIgnoreCase(mfKulam)){
+					return null;
+				}
+			}
+		}
+		if(this.matchForGender == Gender.MALE) {
+			if(mfAge != null && mfAge !=0 && maAge!=null && maAge != 0) {
+				logger.info(mfAge + " vs " + maAge);
+				if(MaleAgeCondForFemale != "") {
+					if(!evaluateCondition(mfAge, maAge, MaleAgeCondForFemale)) {
+						return null;
+					} else {
+						logger.debug(mfAge + " vs " + maAge);
+					}
+					
+				}
+			}
+			if(mfHt != null && mfHt !=0 && maHt!=null && maHt != 0) {
+				logger.info(mfHt + " vs " + maHt);
+				if(MaleHtCondForFemale != "") {
+					if(!evaluateCondition(mfHt.intValue(), maHt.intValue(), MaleHtCondForFemale)) {
+						return null;
+					}
+					
+				}
+			}
+		}else {
+			if(mfAge != null && mfAge !=0 && maAge!=null && maAge != 0) {
+				logger.info(mfAge + " vs " + maAge);
+				if(FemaleAgeCondForMale != "") {
+					if(!evaluateCondition(mfAge, maAge, FemaleAgeCondForMale)) {
+						return null;
+					}
+					
+				}
+			}
+			if(mfHt != null && mfHt !=0 && maHt!=null && maHt != 0) {
+				logger.info(mfHt + " vs " + maHt);
+				if(FemaleHtCondForMale != "") {
+					if(!evaluateCondition(mfHt.intValue(), maHt.intValue(), FemaleHtCondForMale)) {
+						return null;
+					}
+					
+				}
+			}
+		}
+		
+
 		if(matchRk) {			
-			logger.debug(mfRk + " vs " + maRk);
+			logger.info(mfRk + " vs " + maRk);
 			if(mfRk != null && !mfRk.isEmpty() && maRk != null && !maRk.isEmpty()){	
 				if(!mfRk.equalsIgnoreCase("Nil")&& maRk.equalsIgnoreCase("Nil")) {
 					return null;
@@ -309,7 +350,7 @@ public class MatchingEngine {
 			}
 		}
 		if(matchSev) {
-			logger.debug(mfSev + " vs " + maSev);
+			logger.info(mfSev + " vs " + maSev);
 			if(mfSev != null && !mfSev.isEmpty() && maSev != null && !maSev.isEmpty()){	
 				if(!mfSev.equalsIgnoreCase("Nil")&& maSev.equalsIgnoreCase("Nil")) {
 					return null;
@@ -320,7 +361,7 @@ public class MatchingEngine {
 			}
 		}
 		
-		return new MatchingProfile(matchForCandidate.getId(), matchForCandidate.getName(), mas, matStrength, matScore, matchAgainstCandidate);
+		return new MatchingProfile(matchForCandidate.getId(), matchForCandidate.getName(), mfs, matStrength, matScore, matchAgainstCandidate);
 	}
 	private boolean evaluateCondition(Integer mfAttr , Integer maAttr, String operator){
 		boolean result = false;

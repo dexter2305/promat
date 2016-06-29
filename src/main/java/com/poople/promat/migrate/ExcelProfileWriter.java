@@ -284,7 +284,7 @@ public class ExcelProfileWriter {
 		xlMgr.retreiveAndSetCells(s, workplaceCf, o.getCompanyLocation());
 		Note n = null;
 		if (!c.getNotes().isEmpty()) {
-			// as of now only one occupation is stored in excel
+			// as of now only one note is stored in excel
 			Iterator<Note> i = c.getNotes().iterator();
 			n = i.next();
 			n = i.hasNext() ? i.next() : null;

@@ -10,10 +10,14 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -80,7 +84,12 @@ public class ExcelManager {
 		logger.info("EXIT - openWorkBook(String)");
 		return wrkBk;
 	}
-
+	protected Workbook createWorkBook() throws Exception {
+		logger.info("ENTER - createWorkBook()");
+		Workbook wrkBk = new HSSFWorkbook();
+		logger.info("EXIT - createWorkBook()");
+		return wrkBk;
+	}
 	protected Workbook openWorkBook(File file) throws Exception {
 		logger.info("ENTER - openWorkBook(File) : " + file);
 		Workbook wrkBk = null;
@@ -317,19 +326,19 @@ public class ExcelManager {
 		}
 	}
 
-	protected void writeWorkBookToFile(Workbook wrkBk, String reportName) throws Exception {
+	protected void writeWorkBookToFile(Workbook wrkBk, String fileName) throws Exception {
 		FileOutputStream out = null;
 
 		try {
-			out = new FileOutputStream(reportName);
+			out = new FileOutputStream(fileName);
 			wrkBk.write(out);
 			// System.out.println("Written to a file");
 		} catch (FileNotFoundException fnfe) {
-			throw new Exception(fnfe.getMessage() + "Error while writing to Excel:" + reportName);
+			throw new Exception(fnfe.getMessage() + "Error while writing to Excel:" + fileName);
 		} catch (IOException ioe) {
-			throw new Exception(ioe.getMessage() + "Error while writing to Excel:" + reportName);
+			throw new Exception(ioe.getMessage() + "Error while writing to Excel:" + fileName);
 		} catch (Exception e) {
-			throw new Exception(e.getMessage() + "Error while writing to Excel:" + reportName);
+			throw new Exception(e.getMessage() + "Error while writing to Excel:" + fileName);
 		} finally {
 			try {
 				if (out != null) {
@@ -408,5 +417,11 @@ public class ExcelManager {
 	        }
         }
         return null;
+    }
+    public void writeStringArraytoRow(Row row, List<String> contents) {
+    	AtomicInteger index = new AtomicInteger(0);
+    	contents.stream().forEach(content -> {Cell c = row.createCell(index.getAndIncrement()); c.setCellValue(content);
+    	});
+    	
     }
 }

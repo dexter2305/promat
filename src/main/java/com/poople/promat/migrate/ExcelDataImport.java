@@ -23,11 +23,15 @@ import java.util.stream.Stream;
 public class ExcelDataImport {
 
     private static final Log logger = LogFactory.getLog(ExcelDataImport.class);
-
+    //skip the header row and next row (2 rows) 
+    public static int EXCEL_READ_ROW_STARTING_FROM_NUM = 2;
     public static Collection<Candidate> importData(String fileName) throws IOException {
         return importData(fileName, null);
     }
-
+    public static Collection<Candidate> importData(Properties configProps, String fileName, List<String> sheetsToRead) throws Exception {
+    	setExcelConstants(configProps);
+    	return importData(fileName, sheetsToRead);
+    }
     private static class Report {
         private int sheetNumber;
         private long numberOfRowsRead;
@@ -70,9 +74,8 @@ public class ExcelDataImport {
             	if(!readAllSheets && !sheetsToRead.contains(row.getSheet().getSheetName())) {
             		continue;
             	}
-                //skip the header row and next row (2 rows) 
-            	//TODO configure
-                if (row.getRowNum() <= 1) continue;
+                
+                if (row.getRowNum() < EXCEL_READ_ROW_STARTING_FROM_NUM) continue;
                 try {
 					candidate = getCandidateBean(row);
 					if (candidate != null) {
@@ -423,7 +426,7 @@ public class ExcelDataImport {
 	}
 	public static void dataImporter(String[] args) throws Exception {
         if (args == null || args.length < 1) {
-            System.out.println("java com.poople.promat.ExcelDataImport <path-to-xls-file> <sheetname1,sheetname2,sheetname3>");
+            System.out.println("java com.poople.promat.migrate.ExcelDataImport <path-to-xls-file> [sheetname1,sheetname2,sheetname3]");
             System.out.println("if argument #2 is not provided, all sheets in the excel will be read.");
             return;
         }
@@ -442,13 +445,86 @@ public class ExcelDataImport {
         }
 	}
 	public static void test(String[] args) throws Exception {
+		final String confPropFileName = "D:/sandbox/promat2605/promat/src/main/resources/import.conf";
 		final String fileName = "D:/sandbox/web_crawler/conf/20062016/z_srinivasan_20062016.xls";
 		final String sheetsToRead = "sree";
 		//final String fileName = "D:/sandbox/web_crawler/conf/20062016/z_Lakshmi_20062016.xls";
 		//final String sheetsToRead = "Sheet1";
-		String[] newArgs = {fileName, sheetsToRead};
-		ExcelDataImport.dataImporter(newArgs);
+		String[] newArgs = {confPropFileName, fileName, sheetsToRead};
+		ExcelDataImport.dataImporterWithConfig(newArgs);
 	}
+	public static void dataImporterWithConfig(String[] args) throws Exception {
+		if (args == null || args.length < 2) {
+            System.out.println("java com.poople.promat.migrate.ExcelDataImport <config-props-file> <path-to-xls-file> [sheetname1,sheetname2,sheetname3]");
+            System.out.println("if argument #3 is not provided, all sheets in the excel will be read.");
+            return;
+        }
+		Properties configProps = new Properties();
+		configProps.load(new FileInputStream(args[0]));
+        final String fileName = args[1];
+        List<String> sheetsToRead = null;
+        if (args.length > 2 && args[2] != null && args[2].length() > 0) {
+        	sheetsToRead = Arrays.asList((args[2].split(",")));
+    	}
+        try {
+            long startTime = System.currentTimeMillis();
+            ExcelDataImport.importData(configProps,fileName, sheetsToRead);
+            long timeTaken = System.currentTimeMillis() - startTime;
+            logger.info("Completed in " + (timeTaken / 1000) + "s");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+		
+	}
+	private static void setExcelConstants(Properties configProps) throws Exception{
+		List<String> cellRefs = Arrays.asList("userid.col", "extid.col", "sex.col", "name.col", "star.col", "age.col",
+				"dob.col", "time.col", "birthplace.col", "kulam.col", "padham.col", "rasi.col", "lagnam.col", "rk.col",
+				"sev.col", "dasa.col", "iruppu.col", "education.col", "work.place.col", "salary.col", "tech.qual.col",
+				"complexion.col", "ht.col", "blood.group.col", "phone1.col", "phone2.col", "phone3.col", "late.col",
+				"marital.status.col", "note1.col", "note2.col", "note3.col");
+		// Validate if all required cell references are present in input config
+		List<String> notPresentList = cellRefs.stream().filter((propName) -> (!configProps.containsKey(propName)))
+				.collect(Collectors.toList());
+		if (notPresentList != null && notPresentList.size() > 0) {
+			throw new Exception("One or more config values are not persent for following properties : "
+					+ notPresentList.toString());
+		}
+		ExcelColumns.USER_ID.setColumnIndex(Integer.parseInt(configProps.getProperty("userid.col")));
+		ExcelColumns.EXTERNAL_USER_ID.setColumnIndex(Integer.parseInt(configProps.getProperty("extid.col")));
+		ExcelColumns.GENDER.setColumnIndex(Integer.parseInt(configProps.getProperty("sex.col")));
+		ExcelColumns.NAME.setColumnIndex(Integer.parseInt(configProps.getProperty("name.col")));
+		ExcelColumns.STAR.setColumnIndex(Integer.parseInt(configProps.getProperty("star.col")));
+		ExcelColumns.DATE_OF_BIRTH.setColumnIndex(Integer.parseInt(configProps.getProperty("dob.col")));
+		ExcelColumns.TIME_OF_BIRTH.setColumnIndex(Integer.parseInt(configProps.getProperty("time.col")));
+		ExcelColumns.NATIVE.setColumnIndex(Integer.parseInt(configProps.getProperty("birthplace.col")));
+		ExcelColumns.KULAM.setColumnIndex(Integer.parseInt(configProps.getProperty("kulam.col")));
+		ExcelColumns.PADHAM.setColumnIndex(Integer.parseInt(configProps.getProperty("padham.col")));
+		ExcelColumns.RASI.setColumnIndex(Integer.parseInt(configProps.getProperty("rasi.col")));
+		ExcelColumns.LAGNAM.setColumnIndex(Integer.parseInt(configProps.getProperty("lagnam.col")));
+		ExcelColumns.RAAHU_KETHU.setColumnIndex(Integer.parseInt(configProps.getProperty("rk.col")));
+		ExcelColumns.SEVVAI.setColumnIndex(Integer.parseInt(configProps.getProperty("sev.col")));
+		ExcelColumns.DASA.setColumnIndex(Integer.parseInt(configProps.getProperty("dasa.col")));
+		ExcelColumns.IRUPPU.setColumnIndex(Integer.parseInt(configProps.getProperty("iruppu.col")));
+		ExcelColumns.EDUCATION.setColumnIndex(Integer.parseInt(configProps.getProperty("education.col")));
+		ExcelColumns.OCCUPATION_PLACE.setColumnIndex(Integer.parseInt(configProps.getProperty("work.place.col")));
+		ExcelColumns.OCCUPATION_SALARY.setColumnIndex(Integer.parseInt(configProps.getProperty("salary.col")));
+		ExcelColumns.OCCUPATION_TITLE.setColumnIndex(Integer.parseInt(configProps.getProperty("tech.qual.col")));
+		ExcelColumns.SKINTONE.setColumnIndex(Integer.parseInt(configProps.getProperty("complexion.col")));
+		ExcelColumns.HEIGHT.setColumnIndex(Integer.parseInt(configProps.getProperty("ht.col")));
+		ExcelColumns.BLOODGROUP.setColumnIndex(Integer.parseInt(configProps.getProperty("blood.group.col")));
+		ExcelColumns.PHONE_1.setColumnIndex(Integer.parseInt(configProps.getProperty("phone1.col")));
+		ExcelColumns.PHONE_2.setColumnIndex(Integer.parseInt(configProps.getProperty("phone2.col")));
+		ExcelColumns.PHONE_3.setColumnIndex(Integer.parseInt(configProps.getProperty("phone3.col")));
+		ExcelColumns.LATE.setColumnIndex(Integer.parseInt(configProps.getProperty("late.col")));
+		ExcelColumns.MARITAL_STATUS.setColumnIndex(Integer.parseInt(configProps.getProperty("marital.status.col")));
+		ExcelColumns.NOTE_1.setColumnIndex(Integer.parseInt(configProps.getProperty("note1.col")));
+		ExcelColumns.NOTE_2.setColumnIndex(Integer.parseInt(configProps.getProperty("note2.col")));
+		ExcelColumns.NOTE_3.setColumnIndex(Integer.parseInt(configProps.getProperty("note3.col")));
+		EXCEL_READ_ROW_STARTING_FROM_NUM = Integer.parseInt(configProps.getProperty("row.number.starting"));
+		
+	    }
+
     enum ExcelColumns {
     	USER_ID(0),
         EXTERNAL_USER_ID(1),
@@ -492,6 +568,14 @@ public class ExcelDataImport {
         int asInt() {
             return columnIndex;
         }
+
+		public int getColumnIndex() {
+			return columnIndex;
+		}
+
+		public void setColumnIndex(int columnIndex) {
+			this.columnIndex = columnIndex;
+		}
 
     }
 
