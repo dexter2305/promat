@@ -421,8 +421,8 @@ public class ExcelDataImport {
     }
 
 	public static void main(String[] args) throws Exception {
-		ExcelDataImport.test(args);
-		//ExcelDataImport.dataImporter(args);
+		//ExcelDataImport.test(args);
+		ExcelDataImport.dataImporter(args);
 	}
 	public static void dataImporter(String[] args) throws Exception {
         if (args == null || args.length < 1) {
@@ -446,10 +446,10 @@ public class ExcelDataImport {
 	}
 	public static void test(String[] args) throws Exception {
 		final String confPropFileName = "D:/sandbox/promat2605/promat/src/main/resources/import.conf";
-		final String fileName = "D:/sandbox/web_crawler/conf/20062016/z_srinivasan_20062016.xls";
-		final String sheetsToRead = "sree";
-		//final String fileName = "D:/sandbox/web_crawler/conf/20062016/z_Lakshmi_20062016.xls";
-		//final String sheetsToRead = "Sheet1";
+		//final String fileName = "D:/sandbox/promat2605/data/z_srinivasan_04072016.xls";
+		//final String sheetsToRead = "sree";
+		final String fileName = "D:/sandbox/promat2605/data/z_lakshmi_04072016.xls";
+		final String sheetsToRead = "Sheet1";
 		String[] newArgs = {confPropFileName, fileName, sheetsToRead};
 		ExcelDataImport.dataImporterWithConfig(newArgs);
 	}

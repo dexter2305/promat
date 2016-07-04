@@ -341,8 +341,8 @@ public class ExcelProfileWriter {
 		return s;
 	}
 	public static void main(String[] args) throws Exception {
-		ExcelProfileWriter.test(args);
-		//ExcelProfileWriter.profileWriter(args);
+		//ExcelProfileWriter.test(args);
+		ExcelProfileWriter.profileWriter(args);
 	}
 	public static void profileWriter(String[] args) throws Exception {
 

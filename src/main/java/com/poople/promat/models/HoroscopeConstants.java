@@ -1,5 +1,6 @@
 package com.poople.promat.models;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
@@ -7,7 +8,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public interface HoroscopeConstants {
 
@@ -68,7 +68,8 @@ public interface HoroscopeConstants {
 		Star(String name, int[] padham) {
 			this.name = name;
 			this.padham = padham;
-			this.padhamAsString = Stream.of(padham).map(p -> String.valueOf(p)).reduce((p,n) -> (p + "" +n)).get();
+			StringBuilder b = new StringBuilder(); 
+			this.padhamAsString = Arrays.stream(padham).mapToObj(p -> String.valueOf(p)).reduce((p,n) -> (p + "" +n)).get().toString();
 		}
 
 		public int[] getPadham() {
@@ -254,7 +255,9 @@ public interface HoroscopeConstants {
 		}
 		public MatchingStar getMatchingStar(Star inputStar) {
 			Optional<MatchingStar> matching = matchStars.stream().filter(ms -> {
+				//System.out.println(ms.getStar().name+ms.getStar().getPadhamAsString() + " vs " + inputStar.name+ inputStar.getPadhamAsString());
 				if(ms.getStar().name.equals(inputStar.name)) {
+					
 					if(ms.getStar().getPadhamAsString().contains(inputStar.getPadhamAsString())) {
 						return true;
 					}

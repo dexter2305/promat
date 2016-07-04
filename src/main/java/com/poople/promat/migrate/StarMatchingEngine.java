@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -46,7 +47,7 @@ public class StarMatchingEngine {
 	Collection<Candidate> maleProfiles = null;
 	Collection<Candidate> femaleProfiles = null;
 
-	// private Set<Star> matchForStars = new TreeSet<Star>(new CompareStar());
+	//private Set<Star> matchForStars = new TreeSet<Star>(new com.poople.promat.models.HoroscopeConstants.CompareStar());
 	private Set<Star> matchForStars = BoysMatching.getInstance().keySet();
 
 	private static String outFileName;
@@ -59,7 +60,7 @@ public class StarMatchingEngine {
 
 	private void init(String strConfigFileName) throws Exception {
 		logger.info("ENTER - init() :" + strConfigFileName);
-		// matchForStars.addAll(Arrays.asList(Star.ASVINI,Star.BARANI,Star.KARTHIGAI_1,Star.KARTHIGAI_234,Star.ROHINI,Star.MIRUGASEERIDAM_12,Star.MIRUGASEERIDAM_34,Star.THIRUVATHIRAI,Star.PUNARPOOSAM_123,Star.PUNARPOOSAM_4,Star.POOSAM,Star.AYILYAM,Star.MAGAM,Star.POORAM,Star.UTHRAM_1,Star.UTHRAM_234,Star.ASTHAM,Star.CHITHRAI_12,Star.CHITHRAI_34,Star.SWATHI
+		//matchForStars.addAll(Arrays.asList(Star.ASVINI));//,Star.BARANI,Star.KARTHIGAI_1,Star.KARTHIGAI_234,Star.ROHINI,Star.MIRUGASEERIDAM_12,Star.MIRUGASEERIDAM_34,Star.THIRUVATHIRAI,Star.PUNARPOOSAM_123,Star.PUNARPOOSAM_4,Star.POOSAM,Star.AYILYAM,Star.MAGAM,Star.POORAM,Star.UTHRAM_1,Star.UTHRAM_234,Star.ASTHAM,Star.CHITHRAI_12,Star.CHITHRAI_34,Star.SWATHI
 		// ,Star.VISAGAM_123,Star.VISAGAM_4,Star.ANUSHAM,Star.KETTAI,Star.MOOLAM
 		// ,Star.POORADAM,Star.UTHRADAM_1,Star.UTHRADAM_234,Star.THIRUVONAM
 		// ,Star.AVITTAM_12,Star.AVITTAM_34,Star.SATHAYAM
@@ -102,14 +103,13 @@ public class StarMatchingEngine {
 		final String confFile = args[0];
 		StarMatchingEngine me = new StarMatchingEngine(confFile);
 
+		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("ddMMyyhhmm"));
 		Map<Star, Set<MatchingProfile>> boysResultMap = me.matchAllProfiles(Gender.MALE);
-		outFileName = "MatchResultsForBoysStar_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("ddMMyyhhmm"))
-				+ ".xls";
+		outFileName = "MatchResultsForBoysStar_" + timestamp + ".xls";
 		me.writeToExcel(outFileName, boysResultMap);
 
 		Map<Star, Set<MatchingProfile>> girlsResultMap = me.matchAllProfiles(Gender.FEMALE);
-		outFileName = "MatchResultsForGirlsStar_"
-				+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("ddMMyyhhmm")) + ".xls";
+		outFileName = "MatchResultsForGirlsStar_" + timestamp + ".xls";
 		me.writeToExcel(outFileName, girlsResultMap);
 	}
 
@@ -166,7 +166,7 @@ public class StarMatchingEngine {
 
 	private Set<MatchingProfile> matchProfile(Star star) {
 
-		Set<MatchingProfile> starMatches = new TreeSet<MatchingProfile>(new CompareProfilesByStars());
+		Set<MatchingProfile> starMatches = new HashSet<MatchingProfile>();
 		logger.info("Star " + star + " to be matched : " + star);
 		Collection<Candidate> profiles = null;
 		if (matchForGender == Gender.MALE) {
@@ -206,19 +206,20 @@ public class StarMatchingEngine {
 			mas = maHoro.getStar();
 		}
 		if (mfs != null && mas != null) {
-			logger.info(mfs + " vs " + mas);
+			logger.debug(mfs + " vs " + mas);
 			MatchingStar matchResult = null;
 			if (this.matchForGender == Gender.MALE) {
 				matchResult = BoysMatching.getInstance().get(mfs).getMatchingStar(mas);
 			} else {
 				matchResult = GirlsMatching.getInstance().get(mfs).getMatchingStar(mas);
 			}
-			// BoysMatching.getInstance().get(mfs).getMatchingStars().stream().forEach(star
-			// -> {System.out.println(mfs + " matches :" + star.getStar());});
+			
 			if (matchResult != null) {
+				logger.debug("Match result = " + matchAgainstCandidate.getName());
 				matStrength = matchResult.getStrength();
 				matScore = matchResult.getMatch();
 			} else {
+				logger.debug("Match result = " + matchResult);
 				return null;
 			}
 		} else {
