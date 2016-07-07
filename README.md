@@ -1,9 +1,10 @@
 
-To run the project
+Building the project
+Check out the project - git clone https://github.com/dexter2305/promat.git
 
-Install Maven
-git clone https://github.com/dexter2305/promat.git
-mvn jetty:run
+Test the project - ./gradlew test
+Build the entire project - ./gradlew build
+Run the web application with embedded jetty server  - ./gradlew jettyRun 
 http://localhost:8080/promat
 
 
