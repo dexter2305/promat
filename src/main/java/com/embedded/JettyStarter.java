@@ -2,14 +2,8 @@ package com.embedded;
 
 import java.net.URL;
 import java.security.ProtectionDomain;
-
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.annotations.AnnotationConfiguration;
-import org.eclipse.jetty.webapp.Configuration;
-import org.eclipse.jetty.webapp.MetaInfConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.webapp.WebInfConfiguration;
-import org.eclipse.jetty.webapp.WebXmlConfiguration;
 
 public class JettyStarter {
 
@@ -18,13 +12,10 @@ public class JettyStarter {
 
 		WebAppContext webapp = new WebAppContext();
 		webapp.setDescriptor("WEB-INF/web.xml");
-		//webapp.setConfigurations(new Configuration[] { new AnnotationConfiguration(), new WebXmlConfiguration(),
-			//	new WebInfConfiguration(), new MetaInfConfiguration() });
-
 		ProtectionDomain domain = JettyStarter.class.getProtectionDomain();
 		URL location = domain.getCodeSource().getLocation();
 		webapp.setWar(location.toExternalForm());
-		webapp.setContextPath("/");
+		webapp.setContextPath("/promat");
 
 		server.setHandler(webapp);
 

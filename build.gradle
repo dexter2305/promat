@@ -24,8 +24,7 @@ dependencies {
 	embeddedJetty group: 'org.eclipse.jetty', name: 'jetty-io', version: '9.1.1.v20140108'
 	embeddedJetty group: 'org.eclipse.jetty', name: 'jetty-util', version: '9.1.1.v20140108'
 	embeddedJetty group: 'org.eclipse.jetty', name: 'jetty-webapp', version: '9.1.1.v20140108'
-	embeddedJetty group: 'org.eclipse.jetty', name: 'jetty-annotations', version: '9.1.1.v20140108'
-   
+
     compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.13'
     compile group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '3.13'
 
